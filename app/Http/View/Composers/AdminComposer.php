@@ -19,6 +19,15 @@ class AdminComposer
         $bs = BasicSetting::first();
         $be = BasicExtended::first();
 
+        // Fallback for cases where basic_settings might not be the first record
+        if (!$bs) {
+            $defaultLang = \App\Models\Language::where('is_default', 1)->first();
+            if ($defaultLang) {
+                $bs = $defaultLang->basic_setting;
+                $be = $defaultLang->basic_extended;
+            }
+        }
+
         $data = [
             'bs' => $bs,
             'be' => $be
