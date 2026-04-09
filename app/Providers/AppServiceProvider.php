@@ -26,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
         view()->composer(['user-front.*'], \App\Http\View\Composers\UserFrontComposer::class);
         view()->composer(['admin.*'], \App\Http\View\Composers\AdminComposer::class);
         view()->composer(['user.*'], \App\Http\View\Composers\UserComposer::class);
+        view()->composer(['errors.*'], \App\Http\View\Composers\AdminComposer::class);
     }
 }
