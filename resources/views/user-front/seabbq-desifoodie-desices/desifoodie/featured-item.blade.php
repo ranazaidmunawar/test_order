@@ -1,279 +1,612 @@
-   @php
-       use App\Constants\Constant;
-       use App\Http\Helpers\Uploader;
-       use Illuminate\Support\Facades\Auth;
-   @endphp
-   <section class="product-tab-section pt-lg-70 pt-50 pb-lg-90 pb-30">
-       <div class="container">
-           <div class="row">
-               <div class="col-lg-12">
-                   <div class="text-center">
-                       <h2 class="title mb-24" data-aos="fade-up" data-aos-delay="150">
-                           {!! @$userBe->featured_section_title !!}
-                       </h2>
-                       <!-- tabs-navigation -->
-                       <div class="tabs-navigation tabs-navigation-v2 text-center mb-20" data-aos="fade-up"
-                           data-aos-delay="200">
-                           <ul class="nav nav-tabs gap-24" data-hover="fancyHover">
-                               <li class="nav-item active">
-                                   <button class="nav-link radius-sm hover-effect active" data-bs-toggle="tab"
-                                       data-bs-target="#all-cat-items"
-                                       type="button">{{ $keywords['All'] ?? 'All' }}</button>
-                               </li>
-                               @foreach ($categories as $category)
-                                   <li class="nav-item">
-                                       <button class="nav-link radius-sm hover-effect" data-bs-toggle="tab"
-                                           data-bs-target="#cat-{{ $category->id }}"
-                                           type="button">{{ $category->name }}</button>
-                                   </li>
-                               @endforeach
-                           </ul>
-                       </div>
-                   </div>
-               </div>
-           </div>
+@php
+    use App\Constants\Constant;
+    use App\Http\Helpers\Uploader;
+    use Illuminate\Support\Facades\Auth;
+@endphp
 
-           <!-- tab-content -->
-           <div class="tab-content" id="product_TabContent" data-aos="fade-up" data-aos-delay="300">
-               <div class="tab-pane fade show active" id="all-cat-items" role="tabpanel" tabindex="0">
-                   <div class="row">
-                       @foreach ($featured_products as $featured_product)
-                           <div class="col-lg-3 col-md-4 col-6">
-                               <div class="product-card mb-30">
-                                   <div class="card-image">
-                                       <a
-                                           href="{{ route('user.front.product.details', [getParam(), $featured_product->slug, $featured_product->product_id]) }}">
-                                           <img class="blur-up lazyload" src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                                               data-src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $featured_product->feature_image, $userBs) }}"
-                                               alt="product">
-                                       </a>
-                                       <x-add-to-cart :product="$featured_product" :keywords="$keywords" :activeTheme="$activeTheme" />
-                                   </div>
-                                   <div class="content">
-                                       <h6 class="body-font fw-semibold lc-1">
-                                           <a
-                                               href="{{ route('user.front.product.details', [getParam(), $featured_product->slug, $featured_product->product_id]) }}">
-                                               {{ convertUtf8($featured_product->title) }}
-                                           </a>
-                                       </h6>
-                                       <div class="price">
-                                           <span
-                                               class="new-price">{{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}{{ convertUtf8($featured_product->current_price) }}{{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}</span>
-                                           @if (!empty(convertUtf8($featured_product->previous_price)))
-                                               <span
-                                                   class="old-price">{{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}{{ convertUtf8($featured_product->previous_price) }}{{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}</span>
-                                           @endif
-                                       </div>
-                                   </div>
-                               </div>
-                           </div>
-                       @endforeach
-                   </div>
-               </div>
+<!-- Category Scroller -->
+<nav class="category-scroller sticky-top bg-white py-3 shadow-sm" style="top: 0; z-index: 1020;">
+    <div class="container d-flex align-items-center justify-content-center gap-2 overflow-auto no-scrollbar">
+        <a href="javascript:void(0)" class="category-pill active" data-filter="all">
+            <i class="fas fa-th-large"></i> {{ $keywords['All'] ?? 'All' }}
+        </a>
+        @foreach ($categories as $category)
+            <a href="#cat-{{ $category->id }}" class="category-pill" data-filter=".cat-{{ $category->id }}">
+                <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_CATEGORY_IMAGE, $category->image, $userBs) }}"
+                    alt="{{ convertUtf8($category->name) }}"> {{ convertUtf8($category->name) }}
+            </a>
+        @endforeach
+    </div>
+</nav>
 
-               @foreach ($categories as $category)
-                   @php
-                       $category_products = $featured_products->where('category_id', $category->id);
-                       $subcategories = $category
-                           ->subcategories()
-                           ->where('is_feature', 1)
-                           ->where('user_id', $user->id)
-                           ->where('language_id', $userCurrentLang->id)
-                           ->get();
-                   @endphp
+<!-- Products Display -->
+<div class="container-fluid mt-3 px-lg-5">
+    <div class="row mx-1">
+        @foreach ($categories as $category)
+            @php
+                $category_products = $featured_products->where('category_id', $category->id);
+            @endphp
+            @if ($category_products->count() > 0)
+                <div id="cat-{{ $category->id }}" class="col-12 mb-4 cat-section cat-{{ $category->id }}">
+                    <h5 class="fw-bold mb-3 px-2 border-start border-4 border-primary ps-2">
+                        {{ convertUtf8($category->name) }}
+                    </h5>
+                    <div class="row">
+                        @foreach ($category_products as $productInfo)
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                <div class="product-card" onclick="openProductModal({{ $productInfo->toJson() }})">
+                                    <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $productInfo->feature_image, $userBs) }}"
+                                        class="product-image" alt="{{ convertUtf8($productInfo->title) }}">
+                                    <div class="product-details ">
+                                        <h6 class="product-title">{{ convertUtf8($productInfo->title) }}</h6>
+                                        <p class="product-desc mb-2">
+                                            {{ convertUtf8($productInfo->summary ?? $productInfo->description) }}
+                                        </p>
+                                        <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
+                                            <span class="product-price">
+                                                {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}{{ number_format($productInfo->current_price, 2) }}{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}
+                                            </span>
+                                            <button class="add-btn shadow-sm">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @endforeach
+    </div>
+</div>
 
-                   <div class="tab-pane fade" id="cat-{{ $category->id }}" role="tabpanel" tabindex="0">
+<!-- Product Details Modal (Bottom Sheet Style) -->
+<div class="modal fade bottom-sheet" id="productModal" tabindex="-1" aria-hidden="true"
+    style="padding-left: 0 !important;">
+    <div class="modal-dialog">
+        <div class="modal-content overflow-hidden border-0 bg-white shadow-lg">
 
-                       <!--if Subcategory found-->
-                       @if ($subcategories->count() > 0)
-                           <div class="tabs-navigation tabs-navigation-v2 text-center mb-20">
-                               <ul class="nav nav-tabs gap-10 justify-content-center" data-hover="fancyHover" id="subTabs-{{ $category->id }}"
-                                   role="tablist">
-                                   <li class="nav-item">
-                                       <button class="nav-link hover-effect active" id="sub-all-{{ $category->id }}-tab"
-                                           data-bs-toggle="tab" data-bs-target="#sub-all-{{ $category->id }}"
-                                           type="button" role="tab">
-                                           {{ $keywords['All'] ?? 'All' }}
-                                       </button>
-                                   </li>
+            <!-- Hero Image Section -->
+            <div class="modal-product-hero">
+                <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button type="button" class="modal-fav-btn">
+                    <i class="far fa-heart"></i>
+                </button>
+                <img id="modalImg" src="" class="modal-product-img" alt="Product Image">
+                <div
+                    class="position-absolute bottom-0 start-0 w-100 h-25 bg-gradient-to-t from-black to-transparent opacity-50">
+                </div>
+                <div class="position-absolute top-0 start-50 translate-middle-x mt-2"
+                    style="width: 40px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 2px;"></div>
+            </div>
 
-                                   @foreach ($subcategories as $subcat)
-                                       <li class="nav-item">
-                                           <button class="nav-link hover-effect" id="sub-{{ $subcat->id }}-tab"
-                                               data-bs-toggle="tab" data-bs-target="#sub-{{ $subcat->id }}"
-                                               type="button" role="tab">
-                                               {{ $subcat->name }}
-                                           </button>
-                                       </li>
-                                   @endforeach
-                               </ul>
-                           </div>
+            <div class="modal-additions-section p-3 text-center">
+                <div class="mb-4">
+                    <h4 id="modalTitle" class="fw-bold mb-1 fs-4"></h4>
+                    <p id="modalDesc" class="text-muted small mb-0"></p>
+                </div>
 
-                           <div class="tab-content" id="subTabsContent-{{ $category->id }}">
-                               <!--All Subcategory Products-->
-                               <div class="tab-pane fade show active" id="sub-all-{{ $category->id }}" role="tabpanel">
-                                   <div class="row">
-                                       @foreach ($category_products as $product)
-                                           <div class="col-lg-3 col-md-4 col-6">
-                                               <div class="product-card mb-30">
-                                                   <div class="card-image">
-                                                       <a
-                                                           href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}">
-                                                           <img class="blur-up lazyload"
-                                                               src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                                                               data-src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $product->feature_image, $userBs) }}"
-                                                               alt="product">
-                                                       </a>
+                <hr class="opacity-10 my-3">
 
-                                                       <x-add-to-cart :product="$product" :keywords="$keywords"
-                                                           :activeTheme="$activeTheme" />
-                                                   </div>
-                                                   <div class="content">
-                                                       <h6 class="body-font fw-semibold lc-1">
-                                                           <a
-                                                               href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}">
-                                                               {{ convertUtf8($product->title) }}
-                                                           </a>
-                                                       </h6>
-                                                       <div class="price">
-                                                           <span class="new-price">
-                                                               {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                               {{ convertUtf8($product->current_price) }}
-                                                               {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                           </span>
-                                                           @if (!empty($product->previous_price))
-                                                               <span class="old-price">
-                                                                   {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                                   {{ convertUtf8($product->previous_price) }}
-                                                                   {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                               </span>
-                                                           @endif
-                                                       </div>
-                                                   </div>
-                                               </div>
-                                           </div>
-                                       @endforeach
-                                   </div>
-                               </div>
+                <!-- Variations Container -->
+                <div id="variationsContainer" class="mb-4 text-center"></div>
 
-                               <!--Individual Subcategory Tabs-->
-                               @foreach ($subcategories as $subcat)
-                                   @php
-                                       $sub_products = $category_products->where('subcategory_id', $subcat->id);
-                                   @endphp
-                                   <div class="tab-pane fade" id="sub-{{ $subcat->id }}" role="tabpanel">
-                                       <div class="row">
-                                           @if ($sub_products->count() > 0)
-                                               @foreach ($sub_products as $sub_product)
-                                                   <div class="col-lg-3 col-md-4 col-6">
-                                                       <div class="product-card mb-30">
-                                                           <div class="card-image">
-                                                               <a
-                                                                   href="{{ route('user.front.product.details', [getParam(), $sub_product->slug, $sub_product->product_id]) }}">
-                                                                   <img class="blur-up lazyload"
-                                                                       src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                                                                       data-src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $sub_product->feature_image, $userBs) }}"
-                                                                       alt="product">
-                                                               </a>
-                                                               <x-add-to-cart :product="$sub_product" :keywords="$keywords"
-                                                                   :activeTheme="$activeTheme" />
-                                                           </div>
-                                                           <div class="content">
-                                                               <h6 class="body-font fw-semibold lc-1">
-                                                                   <a
-                                                                       href="{{ route('user.front.product.details', [getParam(), $sub_product->slug, $sub_product->product_id]) }}">
-                                                                       {{ convertUtf8($sub_product->title) }}
-                                                                   </a>
-                                                               </h6>
-                                                               <div class="price">
-                                                                   <span class="new-price">
-                                                                       {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                                       {{ convertUtf8($sub_product->current_price) }}
-                                                                       {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                                   </span>
-                                                                   @if (!empty($sub_product->previous_price))
-                                                                       <span class="old-price">
-                                                                           {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                                           {{ convertUtf8($sub_product->previous_price) }}
-                                                                           {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                                       </span>
-                                                                   @endif
-                                                               </div>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-                                               @endforeach
-                                           @else
-                                               <h5 class="text-center mb-0">
-                                                   {{ $keywords['Product Not Found'] ?? 'Product Not Found' }}!</h5>
-                                           @endif
-                                       </div>
-                                   </div>
-                               @endforeach
-                           </div>
-                       @else
-                           <!--if Subcategory not found-->
-                           <div class="row">
-                               @if ($category_products->count() > 0)
-                                   @foreach ($category_products as $product)
-                                       <div class="col-lg-3 col-md-4 col-6">
-                                           <div class="product-card mb-30">
-                                               <div class="card-image">
-                                                   <a
-                                                       href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}">
-                                                       <img class="blur-up lazyload"
-                                                           src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                                                           data-src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $product->feature_image, $userBs) }}"
-                                                           alt="product">
-                                                   </a>
-                                                   <x-add-to-cart :product="$product" :keywords="$keywords"
-                                                       :activeTheme="$activeTheme" />
-                                               </div>
-                                               <div class="content">
-                                                   <h6 class="body-font fw-semibold lc-1">
-                                                       <a
-                                                           href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}">
-                                                           {{ convertUtf8($product->title) }}
-                                                       </a>
-                                                   </h6>
-                                                   <div class="price">
-                                                       <span class="new-price">
-                                                           {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                           {{ convertUtf8($product->current_price) }}
-                                                           {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                       </span>
-                                                       @if (!empty($product->previous_price))
-                                                           <span class="old-price">
-                                                               {{ $be->base_currency_symbol_position == 'left' ? $be->base_currency_symbol : '' }}
-                                                               {{ convertUtf8($product->previous_price) }}
-                                                               {{ $be->base_currency_symbol_position == 'right' ? $be->base_currency_symbol : '' }}
-                                                           </span>
-                                                       @endif
-                                                   </div>
-                                               </div>
-                                           </div>
-                                       </div>
-                                   @endforeach
-                               @else
-                                   <h4 class="text-center">
-                                       {{ $keywords['Product Not Found'] ?? 'Product Not Found' }}!</h4>
-                               @endif
-                           </div>
-                       @endif
-                   </div>
-               @endforeach
-           </div>
-       </div>
-       <div class="shape-area">
-           <div class="shape-1" data-aos="fade-right" data-aos-delay="500">
-               <img class="blur-up lazyload" src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                   data-src="{{ !empty($userBe->featured_left_shape_image) ? Uploader::getImageUrl(Constant::WEBSITE_IMAGE, $userBe->featured_left_shape_image, $userBs) : asset('assets/admin/img/noimage.jpg') }}"
-                   alt="shape">
-           </div>
-           <div class="shape-2" data-aos="fade-left" data-aos-delay="500">
-               <img class="blur-up lazyload" src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                   data-src="{{ !empty($userBe->featured_right_shape_image) ? Uploader::getImageUrl(Constant::WEBSITE_IMAGE, $userBe->featured_right_shape_image, $userBs) : asset('assets/admin/img/noimage.jpg') }}"
-                   alt="shape">
-           </div>
-       </div>
-   </section>
+                <!-- Addons Container -->
+                <div id="addonsContainer" class="mb-5 text-center">
+                    <h6 class="fw-bold mb-3">{{ $keywords['Addons'] ?? __('Addons') }}</h6>
+                    <div class="d-flex flex-wrap justify-content-center gap-2"></div>
+                </div>
+            </div>
+
+            <!-- Sticky Footer - Premium Bar Design (Full Width) -->
+            <div class="modal-sticky-footer">
+                <div class="add-to-cart-bar shadow-sm">
+                    <div class="price-side">
+                        <span id="modalTotalBtn">0.00</span>
+                    </div>
+
+                    <div class="action-side" id="elakAddToCartBtn" onclick="elakAddToCart()">
+                        <span id="addToCartText">{{ $keywords['Add to Cart'] ?? __('Add to Cart') }}</span>
+                    </div>
+
+                    <div class="qty-side">
+                        <button type="button" class="qty-btn-circle" onclick="elakUpdateQty(1)"><i
+                                class="fas fa-plus"></i></button>
+                        <input type="text" id="qtyInput" value="1" readonly class="qty-input-text">
+                        <button type="button" class="qty-btn-circle" onclick="elakUpdateQty(-1)"><i
+                                class="fas fa-minus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Category Scroller - Premium Minimal */
+    .category-scroller {
+        white-space: nowrap;
+        background: white !important;
+        overflow-x: auto;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 12px 10px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .category-scroller::-webkit-scrollbar {
+        display: none;
+    }
+
+    .category-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 18px;
+        border-radius: 50px;
+        background: #f8f9fb;
+        color: #4b5563;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+        font-weight: 500;
+        font-size: 13px;
+        margin-right: 8px;
+    }
+
+    .category-pill img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        margin-right: 8px;
+        border-radius: 50%;
+    }
+
+    .category-pill.active {
+        background: #0a4a4f !important;
+        color: white !important;
+        border-color: #0a4a4f;
+        box-shadow: 0 4px 12px rgba(10, 74, 79, 0.2);
+    }
+
+    /* Product Cards - Centered & Clean (SS 2 style) */
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .product-details {
+        padding: 20px;
+        text-align: center;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #111;
+        margin-bottom: 6px;
+    }
+
+    .product-desc {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        height: 36px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .product-price {
+        font-weight: 800;
+        color: #0a4a4f;
+        font-size: 17px;
+    }
+
+    .add-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #eef7f6;
+        color: #0a4a4f;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .add-btn:hover {
+        background: #0a4a4f;
+        color: white;
+    }
+
+    /* Modal Styling - Rounded Rect Pillars */
+    .modal.bottom-sheet {
+        z-index: 9999;
+    }
+
+    .modal.bottom-sheet .modal-dialog {
+        position: fixed;
+        bottom: 0;
+        margin: 0;
+        width: 100%;
+        max-width: 500px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100%);
+        transition: transform 0.3s ease-out;
+        z-index: 10000;
+    }
+
+    .modal.bottom-sheet.show .modal-dialog {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .modal.bottom-sheet .modal-content {
+        border-radius: 24px 24px 0 0;
+        max-height: 90vh;
+        border: none;
+        overflow: hidden;
+    }
+
+    .modal-product-hero {
+        position: relative;
+        height: 260px;
+        background: #fff;
+    }
+
+    .modal-product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .modal-close-btn,
+    .modal-fav-btn {
+        position: absolute;
+        top: 15px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        color: #333;
+    }
+
+    .addition-pill {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-size: 0.95rem;
+        color: #374151;
+        display: inline-block;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .addition-pill:hover {
+        background: #f3f4f6;
+    }
+
+    .addition-pill.active {
+        background: #eef7f6;
+        border-color: #0a4a4f;
+        color: #0a4a4f;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(10, 74, 79, 0.1);
+    }
+
+    /* Sticky Footer - Full Width Stretch */
+    .modal-sticky-footer {
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        padding: 12px 14px 28px;
+        /* Reduced side padding for 'full width' feel */
+        background: white;
+        z-index: 100;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .add-to-cart-bar {
+        background: #0a4a4f;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        height: 64px;
+        padding: 0 8px;
+        box-shadow: 0 8px 20px rgba(10, 74, 79, 0.25);
+        width: 100%;
+    }
+
+    .price-side {
+        padding: 0 12px;
+        font-weight: 700;
+        font-size: 1.15rem;
+        min-width: 100px;
+    }
+
+    .action-side {
+        flex: 1;
+        text-align: center;
+        font-weight: 700;
+        cursor: pointer;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+    }
+
+    .qty-side {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        padding: 3px;
+        gap: 6px;
+    }
+
+    .qty-btn-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: white;
+        color: #0a4a4f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .qty-btn-circle:active {
+        transform: scale(0.9);
+    }
+
+    .qty-input-text {
+        width: 32px;
+        background: transparent;
+        border: none;
+        color: white;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 576px) {
+        .modal.bottom-sheet .modal-dialog {
+            max-width: 100%;
+        }
+
+        .add-to-cart-bar {
+            height: 60px;
+        }
+
+        .modal-sticky-footer {
+            padding: 10px 10px 30px;
+        }
+    }
+</style>
+<script>
+    let currentProduct = null;
+    let currentProductBasePrice = 0;
+    let selectedAddonsTotal = 0;
+    let selectedVariationsTotal = 0;
+    let currentQty = 1;
+    let selectedVariations = {};
+    let selectedAddons = [];
+    let currencySymbol = "{{ $userBe->base_currency_symbol }}";
+    let currencyPos = "{{ $userBe->base_currency_symbol_position }}";
+
+    function openProductModal(product) {
+        if (typeof product === 'string') {
+            product = JSON.parse(product);
+        }
+        currentProduct = product.product || product;
+
+        currentProductBasePrice = parseFloat(currentProduct.current_price || 0);
+        selectedAddonsTotal = 0;
+        selectedVariationsTotal = 0;
+        currentQty = 1;
+        selectedVariations = {};
+        selectedAddons = [];
+
+        // Update UI
+        document.getElementById('modalTitle').innerText = product.title || product.name;
+        document.getElementById('modalDesc').innerText = product.summary || product.description || '';
+
+        const imgUrl = "{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, ':img', $userBs) }}".replace(':img', currentProduct.feature_image);
+        document.getElementById('modalImg').src = imgUrl;
+        document.getElementById('qtyInput').value = currentQty;
+
+        // Render Variations
+        const varContainer = document.getElementById('variationsContainer');
+        varContainer.innerHTML = '';
+        if (currentProduct.variations) {
+            try {
+                const variations = JSON.parse(currentProduct.variations);
+                for (const [vName, vOptions] of Object.entries(variations)) {
+                    const section = document.createElement('div');
+                    section.className = 'mb-3';
+                    section.innerHTML = `<h6 class="fw-bold mb-2">${vName.replace(/_/g, ' ')}</h6>`;
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'd-flex flex-wrap justify-content-center gap-2';
+
+                    vOptions.forEach(opt => {
+                        const pill = document.createElement('span');
+                        pill.className = 'addition-pill';
+                        pill.innerHTML = `${opt.name} (${currencyPos == 'left' ? currencySymbol : ''}${opt.price}${currencyPos == 'right' ? currencySymbol : ''})`;
+                        pill.onclick = function () {
+                            // Clear previous selection for this variation
+                            optionsDiv.querySelectorAll('.addition-pill').forEach(p => p.classList.remove('active'));
+                            this.classList.add('active');
+
+                            selectedVariations[vName] = { name: opt.name, price: opt.price };
+                            elakCalculateVariationTotal();
+                        };
+                        optionsDiv.appendChild(pill);
+                    });
+                    section.appendChild(optionsDiv);
+                    varContainer.appendChild(section);
+                }
+            } catch (e) { console.error("Variations error:", e); }
+        }
+
+        // Render Addons
+        const additionsContainer = document.querySelector('#addonsContainer .d-flex');
+        additionsContainer.innerHTML = '';
+        if (currentProduct.addons) {
+            try {
+                const addons = JSON.parse(currentProduct.addons);
+                addons.forEach(addon => {
+                    const pill = document.createElement('span');
+                    pill.className = 'addition-pill';
+                    pill.innerHTML = `${addon.name} (+${currencyPos == 'left' ? currencySymbol : ''}${addon.price}${currencyPos == 'right' ? currencySymbol : ''})`;
+                    pill.onclick = function () {
+                        this.classList.toggle('active');
+                        const price = parseFloat(addon.price);
+                        if (this.classList.contains('active')) {
+                            selectedAddons.push({ name: addon.name, price: addon.price });
+                            selectedAddonsTotal += price;
+                        } else {
+                            selectedAddons = selectedAddons.filter(a => a.name !== addon.name);
+                            selectedAddonsTotal -= price;
+                        }
+                        elakCalculateTotal();
+                    };
+                    additionsContainer.appendChild(pill);
+                });
+            } catch (e) { console.error("Addons error:", e); }
+        }
+
+        elakCalculateTotal();
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            new bootstrap.Modal(document.getElementById('productModal')).show();
+        } else {
+            $('#productModal').modal('show');
+        }
+    }
+
+    function elakCalculateVariationTotal() {
+        selectedVariationsTotal = 0;
+        for (const v in selectedVariations) {
+            selectedVariationsTotal += parseFloat(selectedVariations[v].price);
+        }
+        elakCalculateTotal();
+    }
+
+    function elakUpdateQty(delta) {
+        currentQty += delta;
+        if (currentQty < 1) currentQty = 1;
+        document.getElementById('qtyInput').value = currentQty;
+        elakCalculateTotal();
+    }
+
+    function elakCalculateTotal() {
+        const total = (currentProductBasePrice + selectedAddonsTotal + selectedVariationsTotal) * currentQty;
+        const formattedTotal = (currencyPos == 'left' ? currencySymbol : '') + total.toFixed(2) + (currencyPos == 'right' ? currencySymbol : '');
+        document.getElementById('modalTotalBtn').innerText = formattedTotal;
+    }
+
+    function elakAddToCart() {
+        if (!currentProduct) return;
+
+        const btn = document.getElementById('elakAddToCartBtn');
+        const btnText = document.getElementById('addToCartText');
+        const originalText = btnText ? btnText.innerText : 'Add to Cart';
+
+        // Validation for variations (ensure all are selected)
+        if (currentProduct.variations) {
+            try {
+                const variations = JSON.parse(currentProduct.variations);
+                for (const vName in variations) {
+                    if (!selectedVariations[vName]) {
+                        toastr["warning"]("Please select " + vName.replace(/_/g, ' '));
+                        return;
+                    }
+                }
+            } catch (e) { }
+        }
+
+        // Use product_id if available, otherwise fallback to id
+        const pid = currentProduct.product_id || currentProduct.id;
+        const total = (currentProductBasePrice + selectedAddonsTotal + selectedVariationsTotal) * currentQty;
+        const variationsStr = JSON.stringify(selectedVariations);
+        const addonsStr = JSON.stringify(selectedAddons);
+
+        // Construct the multi-parameter ID exactly as the controller expects
+        const cartKey = pid + ',,,' + currentQty + ',,,' + total.toFixed(2) + ',,,' + variationsStr + ',,,' + addonsStr;
+        const url = "{{ route('user.front.add.cart', [getParam(), ':id']) }}".replace(':id', cartKey);
+
+        if (btn) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
+            if (btnText) btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        }
+
+        $.get(url, function (data) {
+            if (data.error) {
+                toastr["error"](data.error);
+                if (btn) {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                    if (btnText) btnText.innerText = originalText;
+                }
+            } else {
+                toastr["success"](data.message || "Added to cart!");
+                // Refresh to update cart count in header
+                setTimeout(() => { location.reload(); }, 500);
+            }
+        }).fail(function (xhr) {
+            console.error("Cart Request Failed", xhr);
+            toastr["error"]("Failed to add to cart. Please try again.");
+            if (btn) {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+                if (btnText) btnText.innerText = originalText;
+            }
+        });
+    }
+</script>

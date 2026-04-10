@@ -32,6 +32,7 @@ class UserController extends Controller
     public function index()
     {
         $user = getUser();
+        $data = [];
         $data['customer'] = Auth::guard('client')->user();
         $data['orders'] = ProductOrder::query()
             ->where('customer_id', $data['customer']->id)
@@ -93,6 +94,7 @@ class UserController extends Controller
             ->where('language_id', $currentLang->id)
             ->first();
 
+        $data = [];
         $data['customer'] = $customer;
         $data['user'] = $user;
         $data['bs'] = $bs;
@@ -171,10 +173,8 @@ class UserController extends Controller
     {
         $user = getUser();
         $currentLang = $this->getUserCurrentLanguage($user);
-        $bs = BasicSetting::query()
-            ->where('user_id', $user->id)
-            ->where('language_id', $currentLang->id)
 
+        $data = [];
         $data['user'] = $user;
         $data['bs'] = BasicSetting::query()
             ->where('user_id', $user->id)

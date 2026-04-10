@@ -16,7 +16,8 @@
     <meta name="description" content="@yield('meta-description')">
     <meta name="keywords" content="@yield('meta-keywords')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('pageHeading') {{ $userBs->website_title !== null ? '|' . ' ' : '' }} {{ $userBs->website_title }}</title>
+    <title>@yield('pageHeading') {{ $userBs->website_title !== null ? '|' . ' ' : '' }} {{ $userBs->website_title }}
+    </title>
 
     <link rel="shortcut icon"
         href="{{ $userBs->favicon ? Uploader::getImageUrl(Constant::WEBSITE_FAVICON, $userBs->favicon, $userBs) : '' }}"
@@ -36,8 +37,11 @@
 
     <style>
         :root {
-            --bs-primary: {{ $primaryColor }};
-            --bs-primary-rgb: {{ hexToRgba($primaryColor) }}
+            --bs-primary:
+                {{ $primaryColor }}
+            ;
+            --bs-primary-rgb:
+                {{ hexToRgba($primaryColor) }}
         }
     </style>
 
@@ -71,7 +75,7 @@
         @yield('content')
 
         <!--whatsapp button-->
-        <div id="WAButton"></div>
+        <!-- <div id="WAButton"></div> -->
 
         <!-- cookie alert -->
         @if ($userBe->cookie_alert_status == 1)

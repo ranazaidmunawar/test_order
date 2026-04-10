@@ -1,289 +1,459 @@
-    @php
-        use App\Constants\Constant;
-        use App\Http\Helpers\Uploader;
-        use Illuminate\Support\Facades\Auth;
+@php
+    use App\Constants\Constant;
+    use App\Http\Helpers\Uploader;
+    use Illuminate\Support\Facades\Auth;
 
-    @endphp
-    <!--========= Start Header =========-->
-    <header class="header-area desifoodie-header">
-        <div class="header-top">
-            <div class="container">
-                <div class="header-top-left">
-                    <span class="">{{ @$userBe->top_header_support_text }}</span>
-                    <a
-                        href="mailto:{{ @$userBe->top_header_support_email }}">{{ @$userBe->top_header_support_email }}</a>
-                </div>
-                <div class="header-top-center">
-                    <span>{{ @$userBe->top_header_middle_text }}</span>
-                </div>
-                <div class="header-top-right">
-                    @if (!empty($userCurrentLang))
-                        <div class="language">
-                            <i class="fa-solid fa-globe"></i>
-                            <select class="niceselect nice-select languageChange">
-                                @foreach ($allLanguageInfos as $key => $lang)
-                                    <option value="{{ route('user.front.change.language', [getParam(), $lang->code]) }}"
-                                        {{ $lang->code == $userCurrentLang->code ? 'selected' : '' }}
-                                        data-href="{{ route('user.front.change.language', [getParam(), $lang->code]) }}">
-                                        {{ convertUtf8($lang->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endif
-                    @if (request()->routeIs('user.front.index'))
-                        <div class="dropdown user-btn">
-                            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                <i class="fa-light fa-user-circle"></i>@auth
-                                    {{ $keywords['Dashboard'] ?? __('Dashboard') }}
-                                @else
-                                {{ $keywords['Login'] ?? __('Login') }} @endauth
-                            </button>
-                            <ul class="dropdown-menu">
-                                @auth
-                                    <li><a class="dropdown-item"
-                                            href="{{ route('user.client.dashboard', getParam()) }}">{{ $keywords['Dashboard'] ?? __('Dashboard') }}</a>
-                                    </li>
-                                @else
-                                    <li><a class="dropdown-item"
-                                            href="{{ route('user.client.login', getParam()) }}">{{ $keywords['Login'] ?? __('Login') }}</a>
-                                    </li>
-                                    <li><a class="dropdown-item" href="{{ route('user.client.register', getParam()) }}">
-                                            {{ $keywords['Sign_Up'] ?? __('Sign Up') }}</a></li>
-                                @endauth
-                            </ul>
-                        </div>
-                    @else
-                        <div class="dropdown user-btn">
-                            <button class="btn dropdown-toggle" type="button" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false">
-                                <i class="fa-light fa-user-circle"></i>
-                                @if (Auth::guard('client')->check())
-                                    {{ $keywords['Dashboard'] ?? __('Dashboard') }}
-                                @else
-                                    {{ $keywords['Login'] ?? __('Login') }}
-                                @endif
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                @if (Auth::guard('client')->check())
-                                    <a class="dropdown-item" href="{{ route('user.client.dashboard', getParam()) }}">
-                                        {{ $keywords['Dashboard'] ?? __('Dashboard') }}
-                                    </a>
-                                @else
-                                    <a class="dropdown-item" href="{{ route('user.client.login', getParam()) }}">
-                                        {{ $keywords['Login'] ?? __('Login') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('user.client.register', getParam()) }}">
-                                        {{ $keywords['Sign_Up'] ?? __('Sign Up') }}
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
+    $cartCount = 0;
+    if (Session::has($user->username . "_cart")) {
+        $cart = Session::get($user->username . "_cart");
+        if (is_array($cart)) {
+            foreach ($cart as $item) {
+                $cartCount += (int) $item['qty'];
+            }
+        }
+    }
+    $links = json_decode($userMenus, true);
+@endphp
 
+<header class="header-main shadow-sm">
+    <div class="container-fluid header-container py-2 px-3 px-md-4">
+        <div class="row align-items-center g-0">
+            <!-- Left: Icons (Cart & Search) -->
+            <div class="col-4 d-flex align-items-center">
+                <a href="{{ route('user.front.cart', getParam()) }}" class="header-icon-btn position-relative me-3">
+                    <i class="fas fa-shopping-cart"></i>
+                    @if($cartCount > 0)
+                        <span class="cart-badge">{{ $cartCount }}</span>
                     @endif
-                </div>
-            </div>
-        </div>
-        <nav class="navbar navbar-expand-xl hover-menu">
-            <div class="container">
-                <!-- Logo -->
-                <a class="navbar-brand" href="{{ route('user.front.index', getParam()) }}" target="_self">
-                    <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_LOGO, $userBs->logo, $userBs) }}"
-                        alt="Brand Logo">
                 </a>
-                <button class="menu-toggler d-block d-xl-none" type="button" data-bs-toggle="offcanvas"
-                    data-bs-target="#mobilemenu-offcanvas" aria-controls="mobilemenu-offcanvas">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <div class="collapse navbar-collapse" id="main_nav">
-                    <!-- Header menu -->
-                    <ul id="mainMenu" class="navbar-nav justify-content-center ms-auto">
-                        @php $links = json_decode($userMenus, true); @endphp
-
-                        @foreach ($links as $link)
-                            @php
-                                $href = getUserHref($link, $userCurrentLang->id);
-                            @endphp
-                            @if (!array_key_exists('children', $link))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ $href }}">{{ $link['text'] }}</a>
-                                </li>
-                            @else
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#"
-                                        data-bs-toggle="dropdown">{{ $link['text'] }}</a>
-                                    <ul class="dropdown-menu shadow">
-                                        @foreach ($link['children'] as $level2)
-                                            @php
-                                                $l2Href = getUserHref($level2, $userCurrentLang->id);
-                                            @endphp
-                                            <li>
-                                                <a class="dropdown-item @if (array_key_exists('children', $level2)) toggle @endif  @if (url() == $l2Href) active @endif"
-                                                    href="{{ $l2Href }}">
-                                                    {{ $level2['text'] }}
-                                                </a>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </li>
-                            @endif
-                        @endforeach
-                    </ul>
-                    <!-- navbar-right -->
-                    <div class="navbar-right ms-auto">
-                         <div class="item cart cartQuantity" id="cartQuantity">
-                        <a href="{{ route('user.front.cart', getParam()) }}" class="btn-icon"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Shopping Cart">
-                            <i class="fal fa-shopping-bag"></i>
-                            @php
-                                $itemsCount = 0;
-                                $cart = session()->get(getUser()->username . '_cart');
-                                if (!empty($cart)) {
-                                    foreach ($cart as $p) {
-                                        $itemsCount += $p['qty'];
-                                    }
-                                }
-                            @endphp
-                            <span class="cart-quantity">{{ $itemsCount }}</span>
-                        </a>
-                    </div>
-                        @if ($userBs->website_call_waiter == 1)
-                            @if (request()->routeIs('user.front.index'))
-                                <div class="item">
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#callWaiterModal"
-                                        class="btn-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="Call Waiter">
-                                        <i class="fal fa-bell"></i>
-                                    </a>
-                                </div>
-                            @else
-                                <div class="item">
-                                    <a href="#" data-toggle="modal" data-target="#callWaiterModal"
-                                        class="btn-icon" data-toggle="tooltip" data-placement="top" title="Call Waiter">
-                                        <i class="fal fa-bell"></i>
-                                    </a>
-                                </div>
-                            @endif
-                        @endif
-                        @if ($userBs->is_quote)
-                            <div class="item reservation-btn">
-                                <a href="{{ route('user.front.reservation', getParam()) }}"
-                                    class="btn thm-btn radius-30">{{ $keywords['Reservation'] ?? __('Reservation') }}</a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+                <a href="javascript:void(0)" class="header-icon-btn" onclick="toggleSearchHeader(true)">
+                    <i class="fas fa-search"></i>
+                </a>
             </div>
-        </nav>
-    </header>
-    <!--========= End Header ==========-->
 
-    <!-- Start Mobile-menu -->
-    <div class="offcanvas desifoodie-mobilemenu mobilemenuoffcanvas offcanvas-start" data-bs-scroll="true"
-        data-bs-backdrop="true" tabindex="-1" id="mobilemenu-offcanvas">
-        <div class="offcanvas-header align-items-center justify-content-between px-20 pt-20">
-            <a class="navbar-brand" href="{{ route('user.front.index', getParam()) }}">
-                <img width="150" class="lazyload blur-up"
-                    src="{{ Uploader::getImageUrl(Constant::WEBSITE_LOGO, $userBs->logo, $userBs) }}" alt="logo">
-            </a>
-            <a href="#" class="menu-close" data-bs-dismiss="offcanvas" aria-label="Close">
-                <i class="fa-light fa-xmark"></i>
-            </a>
-        </div>
-        <div class="offcanvas-body">
-            <!-- mobile-menu clone -->
-            <nav id="mobileMenu" class="mobile-menu mb-40">
+            <!-- Center: Logo/Title -->
+            <div class="col-4 text-center">
+                <a class="header-logo" href="{{ route('user.front.index', getParam()) }}">
+                    <i class="fas fa-utensils me-2"></i> {{ $userBs->website_title }}
+                </a>
+            </div>
 
-            </nav>
-            <!-- menu-action-item-wrapper -->
-            <div class="menu-action-item-wrapper">
-                <div class="group-buttons">
-                    @if (!empty($userCurrentLang))
-                        <div class="language">
-                            <i class="fa-solid fa-globe"></i>
-                            <select class="niceselect nice-select languageChange">
-                                @foreach ($allLanguageInfos as $key => $lang)
-                                    <option
-                                        value="{{ route('user.front.change.language', [getParam(), $lang->code]) }}"
-                                        {{ $lang->code == $userCurrentLang->code ? 'selected' : '' }}
-                                        data-href="{{ route('user.front.change.language', [getParam(), $lang->code]) }}">
-                                        {{ convertUtf8($lang->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endif
-                    <div class="dropdown user-btn">
-                        <button class="btn dropdown-toggle" type="button" data-toggle="dropdown"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-light fa-user-circle"></i> @auth
-                                {{ $keywords['Dashboard'] ?? __('Dashboard') }}
-                            @else
-                                {{ $keywords['Login'] ?? __('Login') }}
-                            @endauth
-                        </button>
-                        <ul class="dropdown-menu">
-                            @auth
-                                <li><a class="dropdown-item"
-                                        href="{{ route('user.client.dashboard', getParam()) }}">{{ $keywords['Dashboard'] ?? __('Dashboard') }}</a>
-                                </li>
-                            @else
-                                <li><a class="dropdown-item"
-                                        href="{{ route('user.client.login', getParam()) }}">{{ $keywords['Login'] ?? __('Login') }}</a>
-                                </li>
-                                <li><a class="dropdown-item" href="{{ route('user.client.register', getParam()) }}">
-                                        {{ $keywords['Sign_Up'] ?? __('Sign Up') }}</a></li>
-                            @endauth
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="navbar-right">
-                    <div class="item">
-                        <a href="{{ route('user.front.cart', getParam()) }}" class="btn-icon" target="_self" aria-label="User" title="Cart">
-                            <i class="fal fa-shopping-bag"></i>
-                            @php
-                                $itemsCount = 0;
-                                $cart = session()->get(getUser()->username . '_cart');
-                                if (!empty($cart)) {
-                                    foreach ($cart as $p) {
-                                        $itemsCount += $p['qty'];
-                                    }
-                                }
-                            @endphp
-                            <span class="cart-quantity">{{ $itemsCount }}</span>
+            <!-- Right: Languages & Menu Toggle -->
+            <div class="col-4 d-flex justify-content-end align-items-center">
+                <div class="lang-switcher d-flex me-3">
+                    @foreach ($allLanguageInfos as $lang)
+                        <a href="{{ route('user.front.change.language', [getParam(), $lang->code]) }}"
+                            class="lang-btn {{ $lang->code == $userCurrentLang->code ? 'active' : '' }}">
+                            {{ strtoupper($lang->code) }}
                         </a>
-                    </div>
-                    @if ($userBs->website_call_waiter == 1)
-                        @if (request()->routeIs('user.front.index'))
-                            <div class="item">
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#callWaiterModal"
-                                    class="btn-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Call Waiter">
-                                    <i class="fal fa-bell"></i>
-                                </a>
-                            </div>
-                        @else
-                            <div class="item">
-                                <a href="#" data-toggle="modal" data-target="#callWaiterModal"
-                                    class="btn-icon" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="Call Waiter">
-                                    <i class="fal fa-bell"></i>
-                                </a>
-                            </div>
-                        @endif
-                    @endif
-                    @if ($userBs->is_quote)
-                        <div class="item reservation-btn">
-                            <a href="{{ route('user.front.reservation', getParam()) }}"
-                                class="btn thm-btn radius-30">{{ $keywords['Reservation'] ?? __('Reservation') }}</a>
-                        </div>
-                    @endif
+                    @endforeach
                 </div>
+                <a href="javascript:void(0)" class="header-icon-btn" onclick="toggleSidebarHeader(true)">
+                    <i class="fas fa-bars"></i>
+                </a>
             </div>
         </div>
     </div>
-    <!-- End Mobile-menu -->
+</header>
+
+<!-- Search Area Overlay (Slides down) -->
+<div id="searchHeaderModal" class="search-header-overlay">
+    <div class="search-header-content p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="m-0 fw-bold">{{ __('Search Product') }}</h5>
+            <button type="button" class="btn-close" onclick="toggleSearchHeader(false)"></button>
+        </div>
+        <div class="position-relative">
+            <div class="input-group search-input-group shadow-sm">
+                <input type="text" id="globalSearchInput" class="form-control border-0 px-4"
+                    placeholder="{{ __('Search delicious food...') }}" autocomplete="off">
+                <button class="btn btn-search-go" type="button" onclick="executeHeaderSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Live Results Container -->
+            <div id="liveSearchResults" class="search-results-dropdown d-none shadow-lg">
+                <div class="results-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Sidebar (Drawer) -->
+<div id="sideDrawerHeader" class="side-drawer-header">
+    <div class="drawer-top p-4 d-flex justify-content-between align-items-center border-bottom">
+        <h5 class="m-0 fw-bold text-dark">{{ __('Menu') }}</h5>
+        <button type="button" class="drawer-close-btn" onclick="toggleSidebarHeader(false)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="drawer-content p-3">
+        <div class="menu-nav-list">
+            <!-- Dynamic Main Menu Items -->
+            @foreach ($links as $link)
+                @php $href = getUserHref($link, $userCurrentLang->id); @endphp
+                @if (!array_key_exists('children', $link))
+                    <a href="{{ $href }}" class="drawer-menu-item shadow-sm">
+                        <span class="text-dark fw-bold">{{ $link['text'] }}</span>
+                        <i class="fas fa-chevron-right text-muted small"></i>
+                    </a>
+                @else
+                    <div class="drawer-menu-collapse shadow-sm">
+                        <a href="javascript:void(0)" class="drawer-menu-item border-0" data-bs-toggle="collapse"
+                            data-bs-target="#menu-child-{{ $loop->index }}">
+                            <span class="text-dark fw-bold">{{ $link['text'] }}</span>
+                            <i class="fas fa-chevron-down text-muted small"></i>
+                        </a>
+                        <div class="collapse ps-3 pb-2" id="menu-child-{{ $loop->index }}">
+                            @foreach ($link['children'] as $child)
+                                @php $childHref = getUserHref($child, $userCurrentLang->id); @endphp
+                                <a href="{{ $childHref }}" class="drawer-child-item">{{ $child['text'] }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endforeach
+
+            <div class="mt-4 border-top pt-4">
+                <!-- Dashboard / Login -->
+                @auth
+                    <a href="{{ route('user.client.dashboard', getParam()) }}"
+                        class="drawer-action-card shadow-sm account-bg">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="action-icon"><i class="fas fa-user-circle"></i></div>
+                            <div>
+                                <span class="fw-bold d-block">{{ __('Dashboard') }}</span>
+                                <small class="text-muted">{{ __('Welcome') }}, {{ Auth::user()->first_name }}</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted small"></i>
+                    </a>
+                @else
+                    <a href="{{ route('user.client.login', getParam()) }}" class="drawer-action-card shadow-sm account-bg">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="action-icon"><i class="fas fa-sign-in-alt"></i></div>
+                            <div>
+                                <span class="fw-bold d-block">{{ __('Login') }}</span>
+                                <small class="text-muted">{{ __('Access your account') }}</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted small"></i>
+                    </a>
+                @endauth
+
+                <!-- Cart Action -->
+                <a href="{{ route('user.front.cart', getParam()) }}"
+                    class="drawer-action-card shadow-sm cart-action-bg">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="action-icon"><i class="fas fa-shopping-bag"></i></div>
+                        <div>
+                            <span class="fw-bold d-block">{{ __('My Cart') }}</span>
+                            @if($cartCount > 0)
+                                <small class="text-success fw-bold">{{ $cartCount }} {{ __('Items') }}</small>
+                            @else
+                                <small class="text-muted">{{ __('Empty') }}</small>
+                            @endif
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted small"></i>
+                </a>
+
+                @if ($userBs->website_call_waiter == 1)
+                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#callWaiterModal"
+                        class="drawer-action-card shadow-sm waiter-bg" onclick="toggleSidebarHeader(false)">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="action-icon"><i class="fas fa-bell"></i></div>
+                            <div>
+                                <span class="fw-bold d-block">{{ __('Call Waiter') }}</span>
+                                <small class="text-muted">{{ __('Need help?') }}</small>
+                            </div>
+                        </div>
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="drawerHeaderOverlay" class="drawer-overlay" onclick="toggleSidebarHeader(false)"></div>
+
+<style>
+    :root {
+        --header-bg: #0a4a4f;
+        --header-text: #ffffff;
+        --drawer-width: 330px;
+    }
+
+    .header-main {
+        background-color: var(--header-bg) !important;
+        z-index: 1050;
+    }
+
+    .header-logo {
+        color: var(--header-text) !important;
+        font-weight: 800;
+        font-size: 1.4rem;
+        text-decoration: none !important;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .header-icon-btn {
+        color: var(--header-text) !important;
+        font-size: 1.3rem;
+        text-decoration: none !important;
+        opacity: 0.9;
+        transition: opacity 0.2s;
+    }
+
+    .header-icon-btn:hover {
+        opacity: 1;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: -6px;
+        right: -10px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 800;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--header-bg);
+    }
+
+    .lang-switcher .lang-btn {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 700;
+        text-decoration: none !important;
+        font-size: 0.85rem;
+        padding: 4px 6px;
+        transition: all 0.2s;
+    }
+
+    .lang-switcher .lang-btn.active {
+        color: #fff;
+    }
+
+    /* Search Overlay */
+    .search-header-overlay {
+        position: fixed;
+        top: -100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        z-index: 2100;
+        transition: top 0.4s ease-in-out;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+    }
+
+    .search-header-overlay.active {
+        top: 0;
+    }
+
+    .search-input-group {
+        background: #f8f9fa;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .btn-search-go {
+        background: var(--header-bg);
+        color: #fff;
+        padding: 10px 20px;
+    }
+
+    .btn-search-go:hover {
+        color: #fff;
+        opacity: 0.9;
+    }
+
+    .search-results-dropdown {
+        position: absolute;
+        top: 110%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border-radius: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 2110;
+        border: 1px solid #f0f0f0;
+    }
+
+    .search-result-row {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        text-decoration: none;
+        color: #333;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .search-result-row:hover {
+        background: #f8f9fa;
+    }
+
+    .search-result-row img {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        margin-right: 15px;
+        object-fit: cover;
+    }
+
+    /* Side Drawer */
+    .side-drawer-header {
+        position: fixed;
+        top: 0;
+        right: calc(-1 * var(--drawer-width) - 20px);
+        width: var(--drawer-width);
+        height: 100%;
+        background: #ffffff;
+        z-index: 2200;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .side-drawer-header.active {
+        right: 0;
+    }
+
+    .drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 2150;
+        display: none;
+        backdrop-filter: blur(2px);
+    }
+
+    .drawer-overlay.active {
+        display: block;
+    }
+
+    .drawer-close-btn {
+        background: #f1f5f9;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+    }
+
+    .drawer-menu-item,
+    .drawer-action-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: white;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        text-decoration: none !important;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s;
+    }
+
+    .drawer-menu-item:active,
+    .drawer-action-card:active {
+        transform: scale(0.98);
+    }
+
+    .drawer-child-item {
+        display: block;
+        padding: 10px 15px;
+        color: #64748b;
+        font-weight: 500;
+        text-decoration: none !important;
+        border-left: 2px solid #e2e8f0;
+        margin-left: 20px;
+        font-size: 0.95rem;
+    }
+
+    .drawer-action-card {
+        background: #f8fafc;
+        border: none;
+    }
+
+    .action-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .account-bg .action-icon {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .cart-action-bg .action-icon {
+        background: #f0fdf4;
+        color: #22c55e;
+    }
+
+    .waiter-bg .action-icon {
+        background: #fff7ed;
+        color: #f97316;
+    }
+
+    @media (max-width: 500px) {
+        :root {
+            --drawer-width: 85%;
+        }
+
+        .header-logo {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<script>
+    function toggleSearchHeader(show) {
+        const modal = document.getElementById('searchHeaderModal');
+        if (show) {
+            modal.classList.add('active');
+            setTimeout(() => document.getElementById('globalSearchInput').focus(), 400);
+        } else {
+            modal.classList.remove('active');
+            document.getElementById('liveSearchResults').classList.add('d-none');
+        }
+    }
+
+    function toggleSidebarHeader(show) {
+        document.getElementById('sideDrawerHeader').classList.toggle('active', show);
+        document.getElementById('drawerHeaderOverlay').classList.toggle('active', show);
+        document.body.style.overflow = show ? 'hidden' : 'auto';
+    }
+
+    function executeHeaderSearch() {
+        const q = document.getElementById('globalSearchInput').value.trim();
+        if (!q) return;
+        window.location.href = "{{ route('user.front.items', [getParam()]) }}?search=" + encodeURIComponent(q);
+    }
+
+    document.getElementById('globalSearchInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') executeHeaderSearch();
+    });
+</script>

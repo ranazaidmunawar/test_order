@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        view()->composer(['front.*'], \App\Http\View\Composers\FrontComposer::class);
         view()->composer(['user-front.*'], \App\Http\View\Composers\UserFrontComposer::class);
         view()->composer(['admin.*'], \App\Http\View\Composers\AdminComposer::class);
         view()->composer(['user.*'], \App\Http\View\Composers\UserComposer::class);

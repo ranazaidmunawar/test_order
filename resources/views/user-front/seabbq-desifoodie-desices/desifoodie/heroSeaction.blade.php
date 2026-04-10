@@ -1,41 +1,55 @@
-   @php
-       use App\Constants\Constant;
-       use App\Http\Helpers\Uploader;
-       use Illuminate\Support\Facades\Auth;
+@php
+    use App\Constants\Constant;
+    use App\Http\Helpers\Uploader;
+    use Illuminate\Support\Facades\Auth;
 
    @endphp
-   <!-- ======= START HERO section ========= -->
-   <section class="hero-area header-next">
-       <div class="container">
-           <div class="row">
-               <div class="col-lg-6">
-                   <div class="content mb-30">
-                       <h1 class="title mb-20" data-aos="fade-up" data-aos-delay="100">
-                           {{ $userBe->hero_section_title ??'Hero Section Title' }}
-                       </h1>
-                       <p class="mb-lg-30 mb-30" data-aos="fade-up" data-aos-delay="200">
-                           {{ $userBe->hero_section_text ?? 'Hero Section Text' }}
-                       </p>
-                       <div class="d-flex gap-3 flex-wrap" data-aos="fade-up" data-aos-delay="300">
-                           @if (!is_null($userBe->hero_section_button_text1_url) && !is_null($userBe->hero_section_button_text))
-                               <a href="{{ $userBe->hero_section_button_text1_url }}"
-                                   class="btn thm-btn">{{ $userBe->hero_section_button_text }}</a>
-                           @endif
-                           @if (!is_null($userBe->hero_section_button2_url) && !is_null($userBe->hero_section_button2_text))
-                               <a href="{{ $userBe->hero_section_button2_url }}"
-                                   class="btn thm-btn-light">{{ $userBe->hero_section_button2_text }}</a>
-                           @endif
-                       </div>
-                   </div>
-               </div>
-               <div class="col-lg-6">
-                   <div class="hero-image" data-aos="fade-left" data-aos-delay="100">
-                       <img class="blur-up lazyload" src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
-                           data-src="{{ $userBe->hero_side_img ? Uploader::getImageUrl(Constant::WEBSITE_IMAGE, $userBe->hero_side_img, $userBs) : '' }}"
-                           alt="image">
-                   </div>
-               </div>
-           </div>
-       </div>
-   </section>
-   <!-- ========= END HERO section ========= -->
+<!-- ======= START HERO section ========= -->
+
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: white !important;
+        opacity: 0.4;
+        z-index: -1;
+    }
+</style>
+
+<section class="">
+    <div class="overlay"></div>
+
+    <!-- Main Slider -->
+    <div id="mainSlider" class="carousel slide main-slider" data-bs-ride="carousel">
+        <!-- <div class="carousel-indicators">
+        <button type="button" data-bs-target="#mainSlider" data-bs-slide-to="0" class="active" aria-current="true"
+            aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#mainSlider" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    </div> -->
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{{ asset('assets/restaurant/seabbq-desifoodie-desices/images/placeholder.svg') }}"
+                    data-src="{{ $userBe->hero_side_img ? Uploader::getImageUrl(Constant::WEBSITE_IMAGE, $userBe->hero_side_img, $userBs) : '' }}"
+                    class="d-block w-100" alt="Special Offer 1">
+            </div>
+            <!-- <div class="carousel-item">
+            <img src="{{ asset('http://127.0.0.1:8000/assets/tenant/image/450db601a3dcfef2404a1ecb147b919bf8706731.png') }}" class="d-block w-100" alt="Special Offer 2">
+        </div> -->
+        </div>
+
+        <!-- <button class="carousel-control-prev" type="button" data-bs-target="#mainSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button> -->
+    </div>
+
+
+</section>
+<!-- ========= END HERO section ========= -->
