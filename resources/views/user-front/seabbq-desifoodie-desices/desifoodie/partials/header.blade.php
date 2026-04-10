@@ -20,7 +20,8 @@
         <div class="row align-items-center g-0">
             <!-- Left: Icons (Cart & Search) -->
             <div class="col-4 d-flex align-items-center">
-                <a href="{{ route('user.front.cart', getParam()) }}" class="header-icon-btn position-relative me-3">
+                <a href="{{ route('user.front.cart', getParam()) }}"
+                    class="header-icon-btn position-relative me-3 mx-3">
                     <i class="fas fa-shopping-cart"></i>
                     @if($cartCount > 0)
                         <span class="cart-badge">{{ $cartCount }}</span>
@@ -118,14 +119,16 @@
 
             <div class="mt-4 border-top pt-4">
                 <!-- Dashboard / Login -->
-                @auth
+                <!-- Dashboard / Account -->
+                @if (Auth::guard('client')->check())
                     <a href="{{ route('user.client.dashboard', getParam()) }}"
                         class="drawer-action-card shadow-sm account-bg">
                         <div class="d-flex align-items-center gap-3">
                             <div class="action-icon"><i class="fas fa-user-circle"></i></div>
                             <div>
                                 <span class="fw-bold d-block">{{ __('Dashboard') }}</span>
-                                <small class="text-muted">{{ __('Welcome') }}, {{ Auth::user()->first_name }}</small>
+                                <small class="text-muted">{{ __('Welcome') }},
+                                    {{ Auth::guard('client')->user()->firstname }}</small>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right text-muted small"></i>
@@ -141,7 +144,19 @@
                         </div>
                         <i class="fas fa-chevron-right text-muted small"></i>
                     </a>
-                @endauth
+                    <a href="{{ route('user.client.register', getParam()) }}"
+                        class="drawer-action-card shadow-sm account-bg mt-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="action-icon" style="background: #f0f9ff; color: #0ea5e9;"><i
+                                    class="fas fa-user-plus"></i></div>
+                            <div>
+                                <span class="fw-bold d-block">{{ __('Sign Up') }}</span>
+                                <small class="text-muted">{{ __('Create a new account') }}</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted small"></i>
+                    </a>
+                @endif
 
                 <!-- Cart Action -->
                 <a href="{{ route('user.front.cart', getParam()) }}"
@@ -168,6 +183,20 @@
                             <div>
                                 <span class="fw-bold d-block">{{ __('Call Waiter') }}</span>
                                 <small class="text-muted">{{ __('Need help?') }}</small>
+                            </div>
+                        </div>
+                    </a>
+                @endif
+
+                {{-- Logout at the last --}}
+                @if (Auth::guard('client')->check())
+                    <a href="{{ route('user.client.logout', getParam()) }}"
+                        class="drawer-action-card shadow-sm mt-3 border-0" style="background: #fff1f2; color: #e11d48;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="action-icon" style="background: #ffe4e6; color: #e11d48;"><i
+                                    class="fas fa-power-off"></i></div>
+                            <div>
+                                <span class="fw-bold d-block">{{ __('Logout') }}</span>
                             </div>
                         </div>
                     </a>
@@ -328,6 +357,27 @@
 
     .side-drawer-header.active {
         right: 0;
+    }
+
+    .drawer-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 50px !important;
+        /* Space at bottom for last items */
+    }
+
+    /* Modern Scrollbar for Drawer */
+    .drawer-content::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .drawer-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .drawer-content::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
     }
 
     .drawer-overlay {

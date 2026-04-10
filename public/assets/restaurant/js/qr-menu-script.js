@@ -103,13 +103,15 @@ function calcTotal() {
   let $servingIn = $("input[name='serving_method']:checked");
   let $shippingIn = $("input[name='shipping_charge']:checked");
 
-  let subTotal = parseFloat($("#subtotal").attr('data'));
+  let subtotalAttr = $("#subtotal").attr('data');
+  let subTotal = subtotalAttr ? parseFloat(subtotalAttr) : 0;
   let total = subTotal;
   let scharge = 0;
-  let tax = $("#tax").data('tax');
+
+  let taxVal = $("#tax").data('tax');
+  let tax = taxVal ? parseFloat(taxVal) : 0;
 
   if ($servingIn.val() == 'home_delivery') {
-
     if (postalCode == 0 && $shippingIn.length > 0) {
       scharge = $shippingIn.attr('data');
     } else if (postalCode == 1) {
@@ -118,8 +120,10 @@ function calcTotal() {
     }
   }
 
+  scharge = parseFloat(scharge) || 0;
+
   $(".shipping").text(scharge);
-  total += parseFloat(scharge) + parseFloat(tax);
+  total += scharge + tax;
   total = total.toFixed(2);
   $(".grandTotal").attr('data', total);
   $(".grandTotal").text(total);

@@ -13,287 +13,654 @@
 @section('content')
 
 
-    @include('user-front.breadcrum', ['title' => $upageHeading?->checkout_page_title])
+<style>
+    :root {
+        --color-primary: #044b4a;
+        --color-primary-rgb: 4, 75, 74;
+    }
+    body { background-color: #f8fbfb; }
+    .cart-page-container {
+        padding-bottom: 200px;
+        max-width: 550px;
+        margin: 0 auto;
+    }
+    /* Toggle */
+    .checkout-toggle-group {
+        display: flex;
+        background: #f1f3f5;
+        border-radius: 50px;
+        padding: 5px;
+        gap: 5px;
+        margin-bottom: 25px;
+    }
+    .checkout-toggle-item {
+        padding: 14px 10px;
+        border-radius: 50px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 700;
+        color: #888;
+        font-size: 0.75rem;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .checkout-toggle-item.active {
+        background: #fff;
+        color: var(--color-primary);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    /* Inputs */
+    .input-with-icon {
+        position: relative;
+        margin-bottom: 12px;
+    }
+    .input-with-icon .form-control, .input-with-icon select {
+        padding-right: 50px;
+        padding-left: 20px;
+        border-radius: 18px;
+        height: 60px;
+        border: 1px solid #f0f0f0;
+        background-color: #fff !important;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+        font-weight: 600;
+    }
+    .input-with-icon .input-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-primary);
+        font-size: 1.1rem;
+    }
+    .floating-label {
+        position: absolute;
+        top: 8px;
+        right: 50px;
+        font-size: 0.65rem;
+        color: var(--color-primary);
+        font-weight: 800;
+        z-index: 10;
+    }
+    
+    /* Boxed Sections */
+    .content-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.01);
+        margin-bottom: 25px;
+    }
 
-    <section class="checkout-area">
-        <form method="POST" id="payment" enctype="multipart/form-data">
-            @csrf
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 mb-5">
-                        <div class="table">
-                            <div class="shop-title-box">
-                                <h3>{{ $keywords['Serving_Method'] ?? __('Serving Method') }}</h3>
-                            </div>
-                            <table class="cart-table shipping-method">
-                                <thead class="cart-header">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>{{ $keywords['Method'] ?? __('Method') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+    /* Order Details Summary */
+    .order-details-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+        margin-bottom: 25px;
+    }
+    .order-details-title { text-align: right; font-weight: 800; font-size: 1rem; margin-bottom: 15px; color: #333; }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+    .summary-row .label { color: #888; font-weight: 600; }
+    .summary-row .value { color: #333; font-weight: 800; }
+    
+    .total-row {
+        border-top: 1.5px solid #f8f9fa;
+        padding-top: 20px;
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .total-label { font-size: 1.25rem; font-weight: 800; color: var(--color-primary); }
+    .total-value { font-size: 1.6rem; font-weight: 900; color: var(--color-primary); }
 
-                                    @foreach ($smethods as $sm)
-                                        <tr>
-                                            @if (!empty($packagePermissions) && in_array($sm->name, $packagePermissions))
-                                                <td>
+    /* Payment Buttons */
+    .payment-method-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    .payment-btn {
+        flex: 1;
+        background: #fff;
+        border: 1.5px solid #f0f0f0;
+        border-radius: 18px;
+        padding: 15px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-height: 85px;
+    }
+    .payment-btn.active {
+        border-color: var(--color-primary);
+        background: #f1f9f9;
+        box-shadow: 0 8px 20px rgba(var(--color-primary-rgb), 0.08);
+    }
+    .payment-btn .btn-text { font-weight: 800; font-size: 0.85rem; color: var(--color-primary); text-align: center; margin-top: 8px; }
+    .payment-btn .payment-icons { display: flex; gap: 5px; margin-bottom: 2px; }
+    .payment-btn .payment-icons img { height: 18px; }
 
-                                                    <input type="radio" name="serving_method" class="shipping-charge"
-                                                        value="{{ $sm->value }}"
-                                                        @if (empty(old()) && $loop->first) checked
-                                                   @elseif(old('serving_method') == $sm->value)
-                                                       checked @endif
-                                                        data-gateways="{{ $sm->gateways }}">
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $smname = str_replace(' ', '_', $sm->name);
-                                                    @endphp
+    /* Section Headers */
+    .section-header { text-align: right; font-weight: 800; font-size: 0.9rem; color: #333; margin-bottom: 15px; }
 
-                                                    <p class="mb-1">
-                                                        <strong>{{ $keywords[$smname] ?? __($sm->name) }}</strong></p>
-                                                    <p class="mb-0"><small>{{ __($sm->note) }}</small></p>
-                                                </td>
-                                            @else
-                                                <td class="d-none">
-                                                    <input type="radio" name="serving_method" class="shipping-charge"
-                                                        value="{{ $sm->value }}"
-                                                        @if (empty(old()) && $loop->first) checked
-                                                   @elseif(old('serving_method') == $sm->value)
-                                                       checked @endif
-                                                        data-gateways="{{ $sm->gateways }}">
-                                                </td>
-                                            @endif
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            @error('serving_method')
-                                <p class="text-danger mb-0">{{ convertUtf8($message) }}</p>
-                            @enderror
-                        </div>
+    /* Product Summary */
+    .product-summary-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+    .product-summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    .product-summary-item:last-child { border-bottom: none; }
+    .product-summary-item img { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; }
+    .product-info h6 { margin: 0; font-weight: 800; font-size: 0.8rem; }
+    .product-info span { font-size: 0.7rem; color: #888; font-weight: 600; }
+
+    /* Sticky Action Bar */
+    .sticky-action-bar-container {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 1000;
+        padding: 0 15px;
+    }
+    .sticky-card {
+        background: #fff;
+        padding: 10px;
+        border-radius: 25px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    }
+    .btn-submit {
+        background-color: var(--color-primary);
+        color: #fff;
+        width: 100%;
+        border: none;
+        border-radius: 20px;
+        padding: 16px;
+        font-weight: 800;
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Notes Textarea */
+    .order-notes-textarea {
+        border-radius: 18px;
+        border: 1px solid #f0f0f0;
+        padding: 15px 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+        min-height: 120px;
+        resize: none;
+        background-color: #fff;
+    }
+    
+    /* Coupon */
+    .coupon-box {
+        background: #fff;
+        border-radius: 18px;
+        padding: 8px;
+        display: flex;
+        gap: 10px;
+        border: 1px solid #f0f0f0;
+        margin-bottom: 25px;
+    }
+    .coupon-box input { border: none; flex-grow: 1; padding: 0 15px; font-weight: 600; outline: none; font-size: 0.85rem; }
+    .btn-apply {
+        background: var(--color-primary);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="container py-7 cart-page-container">
+    <!-- Header -->
+    <div class="position-relative mb-4 text-center pt-5">
+        <h4 class="fw-bold mb-0">{{ $keywords['Complete the order'] ?? __('Complete the order') }}</h4>
+        <a href="{{ route('user.front.cart', getParam()) }}" class="d-flex align-items-center justify-content-center position-absolute"
+           style="width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary); top: 50%; right: 0; transform: translateY(-50%);">
+            <i class="fas fa-chevron-right text-white"></i>
+        </a>
+    </div>
+
+      <form method="POST" id="payment" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" name="ordered_from" value="website">
+
+        <!-- Serving Methods -->
+        <h6 class="section-header">Serving method</h6>
+        <div class="checkout-toggle-group">
+            @foreach ($smethods as $sm)
+                @php
+                    $label = $sm->name;
+                    if ($sm->name == 'On Table') $label = 'Eat at the restaurant';
+                    elseif ($sm->name == 'Pick Up') $label = 'Receive it yourself';
+                    elseif ($sm->name == 'Home Delivery') $label = 'Delivery';
+                @endphp
+                <div class="checkout-toggle-item serving-method-toggle {{ $loop->first ? 'active' : '' }}" 
+                     onclick="selectServingMethod('{{ $sm->value }}', this)">
+                    <input type="radio" name="serving_method" value="{{ $sm->value }}" class="d-none" 
+                           {{ $loop->first ? 'checked' : '' }}>
+                    <span>{{ $keywords[str_replace(' ', '_', $label)] ?? __($label) }}</span>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Contact Information Fields -->
+        <h6 class="section-header">Contact information</h6>
+        <div class="content-box">
+            <div id="dynamic-fields">
+                <!-- <div id="on_table_fields" class="serving-fields" style="display:none;">
+                    <div class="input-with-icon">
+                        <input type="text" name="table_number" class="form-control" placeholder="Table number *" value="{{ session('table') }}">
+                        <span class="input-icon"><i class="fas fa-utensils"></i></span>
                     </div>
-                </div>
-                <input type="hidden" name="ordered_from" value="website">
-                <div class="form-container" id="home_delivery">
-                    @includeIf('user-front.qrmenu.partials.home_delivery_form')
-                </div>
-                <div class="form-container d-none" id="pick_up">
-                    @includeIf('user-front.qrmenu.partials.pick_up_form')
-                </div>
-                <div class="form-container d-none" id="on_table">
-                    @includeIf('user-front.qrmenu.partials.on_table_form')
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="field-label">{{ $keywords['Order_Notes'] ?? __('Order Notes') }} </div>
-                        <div class="field-input">
-                            <textarea name="order_notes" cols="30" rows="10"></textarea>
-                        </div>
+                    <div class="input-with-icon">
+                        <input type="text" name="waiter_name" class="form-control" placeholder="Waiter name">
+                        <span class="input-icon"><i class="fas fa-user-tie"></i></span>
                     </div>
-                </div>
-                <div id="paymentInputs"></div>
-            </div>
-            <div class="bottom">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
-                            <div class="table">
-                                <div class="shop-title-box">
-                                    <h3>{{ $keywords['Order_Summary'] ?? __('Order Summary') }}</h3>
-                                </div>
-                                @if (!empty($cart))
-                                    <table class="cart-table">
-                                        <thead class="cart-header">
-                                            <tr>
-                                                <th class="prod-column" width="10%">
-                                                    {{ $keywords['Product'] ?? __('Product') }}</th>
-                                                <th width="70%">{{ $keywords['Product_Title'] ?? __('Product Title') }}
-                                                </th>
-                                                <th>{{ $keywords['Quantity'] ?? __('Quantity') }}</th>
-                                                <th>{{ $keywords['Total'] ?? __('Total') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($cart as $key => $item)
-                                                @php
-                                                    $id = $item['id'];
-                                                    if (session()->has('user_lang')) {
-                                                        $lang = App\Models\User\Language::where(
-                                                            'code',
-                                                            session()->get('user_lang'),
-                                                        )
-                                                            ->where('user_id', getUser()->id)
-                                                            ->first();
-                                                    } else {
-                                                        $lang = App\Models\User\Language::where('is_default', 1)
-                                                            ->where('user_id', getUser()->id)
-                                                            ->first();
-                                                    }
-                                                    $product = Product::query()
-                                                        ->join(
-                                                            'product_informations',
-                                                            'product_informations.product_id',
-                                                            'products.id',
-                                                        )
-                                                        ->where('product_informations.language_id', $lang->id)
-                                                        ->where('products.user_id', $user->id)
-                                                        ->where('products.id', $id)
-                                                        ->first();
-                                                @endphp
-                                                <tr class="remove{{ $id }}">
-                                                    <td class="prod-column" width="10%">
-                                                        <div class="column-box">
-                                                            <div class="prod-thumb">
-                                                                <a href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}"
-                                                                    target="_blank">
-                                                                    <img class="lazy"
-                                                                        data-src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $item['photo'], $userBs) }}"
-                                                                        alt="" width="100">
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td width="70%">
-                                                        <div class="title">
-                                                            <a href="{{ route('user.front.product.details', [getParam(), $product->slug, $product->product_id]) }}"
-                                                                target="_blank">
-                                                                <h5 class="prod-title">
-                                                                    {{ strlen($product->title) > 27 ? mb_substr($product->title, 0, 27, 'UTF-8') . '...' : $product->title }}
-                                                                </h5>
-                                                                @if (!empty($item['variations']))
-                                                                    @php
-                                                                        $variations = $item['variations'];
-                                                                        $prokeywords = json_decode(
-                                                                            $product->keywords,
-                                                                            true,
-                                                                        );
-                                                                        $addonkeywords = json_decode(
-                                                                            $product->addon_keywords,
-                                                                            true,
-                                                                        );
-                                                                        $sessionLang = session()->get('user_lang');
+                </div> -->
 
-                                                                    @endphp
-
-                                                                    <p><strong>{{ $keywords['Variation'] ?? __('Variation') }}:</strong>
-                                                                        <br>
-                                                                        @php
-                                                                            $variations = $item['variations'];
-                                                                        @endphp
-                                                                        @foreach ($variations as $vKey => $variation)
-                                                                            @php
-
-                                                                                $vname =
-                                                                                    $userCurrentLang->code .
-                                                                                    '_' .
-                                                                                    str_replace('_', ' ', $vKey);
-                                                                                $voption =
-                                                                                    $userCurrentLang->code .
-                                                                                    '_' .
-                                                                                    $variation['name'];
-
-                                                                                $variationName = isset(
-                                                                                    $prokeywords['variation_name'][
-                                                                                        $vname
-                                                                                    ],
-                                                                                )
-                                                                                    ? $prokeywords['variation_name'][
-                                                                                        $vname
-                                                                                    ]
-                                                                                    : '';
-                                                                                $optionName = isset(
-                                                                                    $prokeywords['option_name'][
-                                                                                        $voption
-                                                                                    ],
-                                                                                )
-                                                                                    ? $prokeywords['option_name'][
-                                                                                        $voption
-                                                                                    ]
-                                                                                    : '';
-                                                                            @endphp
-                                                                            @if (!empty($variationName))
-                                                                                <span
-                                                                                    class="text-capitalize font-weight-bold {{ $userCurrentLang->rtl == 1 ? 'text-right' : '' }}">{{ $variationName }}:</span>
-                                                                                <span
-                                                                                    class="{{ $userCurrentLang->rtl == 1 ? 'text-right' : '' }}">{{ $optionName }}</span>
-
-                                                                                @if (!$loop->last)
-                                                                                    <span
-                                                                                        class="{{ $userCurrentLang->rtl == 1 ? 'text-right' : '' }}">
-                                                                                        ,</span>
-                                                                                @endif
-                                                                            @endif
-                                                                        @endforeach
-                                                                    </p>
-                                                            </a>
-                                            @endif
-                                            @if (!empty($item['addons']))
-                                                <p>
-                                                    <strong>{{ $keywords['Addons'] ?? __('Addons') }}:</strong>
-                                                    @php
-                                                        $addons = $item['addons'];
-                                                    @endphp
-                                                    @foreach ($addons as $addon)
-                                                        @php
-                                                            $addonkeywords = json_decode(
-                                                                $product->addon_keywords,
-                                                                true,
-                                                            );
-                                                            if (!empty($sessionLang)) {
-                                                                $aname = $sessionLang . '_' . $addon['name'];
-                                                            } else {
-                                                                $aname = $userCurrentLang->code . '_' . $addon['name'];
-                                                            }
-
-                                                        @endphp
-
-                                                        {{ $addonkeywords['addon_name'][$aname] }}
-                                                        @if (!$loop->last)
-                                                            ,
-                                                        @endif
-                                                    @endforeach
-                                                </p>
-                                            @endif
-                            </div>
-                            </td>
-                            <td class="qty">
-                                {{ $item['qty'] }}
-                            </td>
-                            <input type="hidden" value="{{ $id }}" class="product_id">
-                            <td class="sub-total">
-                                {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}
-                                {{ $item['total'] }}
-                                {{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}
-                            </td>
-                            </tr>
+                <div id="home_delivery_fields" class="serving-fields" style="display:none;">
+                    @if ($userBs->postal_code == 1 && !empty($pfeatures) && in_array('Postal Code Based Delivery Charge',$pfeatures))
+                    <div class="input-with-icon">
+                        <span class="floating-label">{{ $keywords['Select region'] ?? __('Select region') }} *</span>
+                        <select name="postal_code" id="postal_code" class="form-control">
+                            <option value="" disabled selected>{{ $keywords['Select region'] ?? __('Select region') }}</option>
+                            @foreach ($postcodes as $pc)
+                                <option value="{{ $pc->id }}" data="{{ !empty($pc->free_delivery_amount) && (cartTotal() >= $pc->free_delivery_amount) ? 0 : $pc->charge }}">
+                                    {{ $pc->title }}
+                                </option>
                             @endforeach
-                        @else
-                            <div class="py-5 bg-light text-center">
-                                <h5>{{ $keywords['Cart_is_empty'] ?? __('Cart is empty!') }}</h5>
+                        </select>
+                        <span class="input-icon"><i class="fas fa-map-marker-alt"></i></span>
+                    </div>
+                    @elseif ($userBs->postal_code == 0 && count($scharges) > 0)
+                    <div class="input-with-icon">
+                        <span class="floating-label">{{ $keywords['Shipping Charge'] ?? __('Shipping Charge') }} *</span>
+                        <select name="shipping_charge" id="shipping_charge" class="form-control">
+                            <option value="" disabled selected>{{ $keywords['Select shipping charge'] ?? __('Select shipping charge') }}</option>
+                            @foreach ($scharges as $scharge)
+                                <option value="{{ $scharge->id }}" data="{{ !empty($scharge->free_delivery_amount) && (cartTotal() >= $scharge->free_delivery_amount) ? 0 : $scharge->charge }}">
+                                    {{ $scharge->title }} (+ {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}{{ $scharge->charge }}{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="input-icon"><i class="fas fa-truck"></i></span>
+                    </div>
+                    @endif
+                    <div class="input-with-icon">
+                        <input type="text" name="shipping_address" class="form-control" placeholder="{{ $keywords['Enter the address'] ?? __('Enter the address') }} *" value="{{ Auth::guard('client')->check() ? Auth::guard('client')->user()->shipping_address : '' }}">
+                        <span class="input-icon"><i class="fas fa-home"></i></span>
+                    </div>
+
+                    @if ($userBe->delivery_date_time_status == 1)
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <div class="input-with-icon mb-0">
+                                <input type="text" name="delivery_date" class="form-control delivery-datepicker" placeholder="{{ $keywords['Date'] ?? __('Date') }} {{ $userBe->delivery_date_time_required == 1 ? '*' : '' }}" autocomplete="off">
+                                <span class="input-icon"><i class="far fa-calendar-alt"></i></span>
                             </div>
-                            @endif
-                            </tbody>
-                            </table>
-                            <div class="text-center my-4">
-                                <a href="{{ route('user.front.index', getParam()) }}"
-                                    class="main-btn main-btn-2">{{ $keywords['Return_to_Website'] ?? __('Return to Website') }}</a>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-with-icon mb-0">
+                                <select name="delivery_time" id="deliveryTime" class="form-control">
+                                    <option value="" disabled selected>{{ $keywords['Time'] ?? __('Time') }}</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
-                        @includeIf('user-front.qrmenu.partials.order_total')
+                    @endif
+                </div>
+
+                <div class="input-with-icon">
+                    <input type="text" name="billing_fname" class="form-control" placeholder="Enter the name *" value="{{ Auth::guard('client')->check() ? Auth::guard('client')->user()->firstname : '' }}" required>
+                    <span class="input-icon"><i class="fas fa-user"></i></span>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <div class="input-with-icon mb-0">
+                            <select name="billing_country_code" class="form-control px-2" style="font-size: 0.8rem;">
+                                @foreach ($ccodes as $cc)
+                                    <option value="{{ $cc['code'] }}" {{ $cc['code'] == '+972' ? 'selected' : '' }}>{{ $cc['code'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="input-with-icon mb-0">
+                            <input type="tel" name="billing_number" class="form-control" placeholder="Enter mobile number *" value="{{ Auth::guard('client')->check() ? Auth::guard('client')->user()->phone : '' }}" required>
+                            <span class="input-icon"><i class="fas fa-mobile-alt"></i></span>
+                        </div>
                     </div>
                 </div>
+
+                @guest
+                <div class="input-with-icon">
+                    <input type="email" name="billing_email" class="form-control" placeholder="{{ $keywords['Email address'] ?? __('Email address') }} *" required>
+                    <span class="input-icon"><i class="far fa-envelope"></i></span>
+                </div>
+                @else
+                <input type="hidden" name="billing_email" value="{{ Auth::guard('client')->user()->email }}">
+                @endguest
+
+                {{-- Fields for On Table Method --}}
+                <div id="on_table_fields" class="serving-fields" style="display:none;">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="input-with-icon">
+                                <input type="text" name="table_number" class="form-control" placeholder="{{ $keywords['Table Number'] ?? __('Table Number') }} *" value="{{ Session::get('table') }}">
+                                <span class="input-icon"><i class="fas fa-utensils"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-with-icon">
+                                <input type="text" name="waiter_name" class="form-control" placeholder="{{ $keywords['Waiter Name'] ?? __('Waiter Name') }}">
+                                <span class="input-icon"><i class="fas fa-user-tie"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Fields for Pick Up Method --}}
+                <div id="pick_up_fields" class="serving-fields" style="display:none;">
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <div class="input-with-icon">
+                                <input type="text" name="pick_up_date" class="form-control datepicker" placeholder="{{ $keywords['Pick up Date'] ?? __('Pick up Date') }} *" autocomplete="off">
+                                <span class="input-icon"><i class="far fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-with-icon">
+                                <input type="text" name="pick_up_time" class="form-control timepicker" placeholder="{{ $keywords['Pick up Time'] ?? __('Pick up Time') }} *" autocomplete="off">
+                                <span class="input-icon"><i class="far fa-clock"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <textarea name="order_notes" class="form-control order-notes-textarea mt-3" rows="2" placeholder="{{ $keywords['Additional notes for the order'] ?? __('Additional notes for the order') }}"></textarea>
             </div>
+        </div>
+
+
+        <!-- Order Summary (Products) -->
+        <h6 class="section-header">{{ $keywords['Items summary'] ?? __('Items summary') }}</h6>
+        <div class="summary-card py-2">
+            @if(!empty($cart))
+                @foreach($cart as $key => $item)
+                    @php 
+                        $id = $item['id'];
+                        $product = Product::query()
+                            ->join('product_informations', 'product_informations.product_id', 'products.id')
+                            ->where('product_informations.language_id', $userCurrentLang->id)
+                            ->where('products.user_id', $user->id)
+                            ->where('products.id', $id)
+                            ->first();
+                    @endphp
+                    <div class="product-summary-item p-3 border-bottom last-child-border-0">
+                        <div class="d-flex align-items-center justify-between" style="width:100%">
+                            <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $item['photo'], $userBs) }}" 
+                                 class="rounded-3 shadow-sm border" 
+                                 style="width: 55px; height: 55px; object-fit: cover;" alt="">
+                            <div class="product-info flex-grow-1 ms-3 mx-3">
+                                <h6 class="mb-1 text-dark fw-bold" style="font-size: 0.9rem;">{{ $item['name'] }}</h6>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    <span class="me-2">{{ $keywords['Qty'] ?? __('Qty') }}: <strong>{{ $item['qty'] }}</strong></span>
+                                    @if (!empty($item['variations']))
+                                        <div class="mt-1">
+                                            @foreach ($item['variations'] as $vKey => $variation)
+                                                <span class="me-1 text-primary">{{ str_replace('_', ' ', $vKey) }}: {{ $variation['name'] }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if (!empty($item['addons']))
+                                        <div class="mt-1 text-success">
+                                            + {{ implode(', ', array_column($item['addons'], 'name')) }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="product-price fw-bold text-dark text-end" style="font-size: 0.95rem; min-width: 70px;">
+                                {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}{{ $item['total'] }}{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+
+        <!-- Coupon -->
+        <h6 class="section-header mt-4">{{ $keywords['Coupon'] ?? __('Coupon') }}</h6>
+        <div class="coupon-box shadow-sm mb-4">
+            <input type="text" id="coupon_code" name="coupon" placeholder="{{ $keywords['Enter coupon code'] ?? __('Enter coupon code') }}">
+            <button type="button" class="btn-apply" onclick="applyCoupon()">{{ $keywords['Apply'] ?? __('Apply') }}</button>
+        </div>
+
+        <!-- Order Details (Calculations) -->
+        <h6 class="section-header">{{ $keywords['Order_details'] ?? __('Order details') }}</h6>
+        <div id="cartTotal">
+            <div class="order-details-box">
+                {{-- Cart Total --}}
+                <div class="summary-row">
+                    <span class="value">{{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}<span class="subtotal" data="{{ cartTotal() }}">{{ cartTotal() }}</span>{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}</span>
+                    <span class="label">{{ $keywords['Cart_Total'] ?? __('Cart Total') }}</span>
+                </div>
+
+                {{-- Discount --}}
+                <div id="discount-row" class="summary-row text-success">
+                    <span class="value">- {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}<span id="discount-val">{{ $discount }}</span>{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}</span>
+                    <span class="label">{{ $keywords['Discount'] ?? __('Discount') }}</span>
+                </div>
+
+                {{-- Cart Subtotal --}}
+                <div class="summary-row fw-bold">
+                    <span class="value">{{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}<span id="subtotal" data="{{ cartTotal() - $discount }}">{{ cartTotal() - $discount }}</span>{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}</span>
+                    <span class="label">{{ $keywords['Cart_Subtotal'] ?? __('Cart Subtotal') }}</span>
+                </div>
+
+                {{-- Tax --}}
+                @if($userBe->tax > 0)
+                @php
+                    $dataTax = tax();
+                    $dataTax = json_decode($dataTax, true);
+                @endphp
+                <div class="summary-row">
+                    <span class="value">+ {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}<span id="tax" data-tax="{{ $dataTax['tax'] }}">{{ $dataTax['tax'] }}</span>{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}</span>
+                    <span class="label">{{ $keywords['Tax'] ?? __('Tax') }} ({{ $userBe->tax }}%)</span>
+                </div>
+                @endif
+
+                {{-- Shipping Charge --}}
+                <div id="shipping-row" class="summary-row">
+                    <span class="value">+ {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}<span class="shipping" data="0">0</span>{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}</span>
+                    <span class="label">{{ $keywords['Shipping_Charge'] ?? __('Shipping Charge') }}</span>
+                </div>
+
+                {{-- Grand Total --}}
+                <div class="total-row">
+                    <div class="total-value">
+                        {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}
+                        <span class="grandTotal"></span>
+                        {{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}
+                    </div>
+                    <div class="total-label">{{ $keywords['Total'] ?? __('Total') }}</div>
+                </div>
             </div>
-        </form>
-    </section>
+        </div>
+
+        <!-- Payment Method -->
+        @php
+            $firstOffline = $ogateways->first();
+            $firstOnline = null;
+            $onlineList = ['paypal', 'stripe', 'paystack', 'flutterwave', 'razorpay', 'instamojo', 'paytm', 'mollie', 'mercadopago', 'anet', 'yoco', 'xendit', 'perfect_money', 'midtrans', 'myfatoorah', 'toyyibpay', 'paytabs', 'iyzico', 'phonepe'];
+            $onlineGateways = ['paypal', 'stripe', 'paystack', 'flutterwave', 'razorpay', 'instamojo', 'paytm', 'mollie', 'mercadopago', 'anet', 'yoco', 'xendit', 'perfect_money', 'midtrans', 'myfatoorah', 'toyyibpay', 'paytabs', 'phonepe'];
+            foreach($onlineGateways as $gw) {
+                if(isset($$gw) && $$gw->status == 1) {
+                    $firstOnline = $gw;
+                    break;
+                }
+            }
+        @endphp
+
+        <h6 class="section-header">{{ $keywords['payment_method'] ?? __('payment method') }}</h6>
+        <div class="payment-method-row">
+            <div class="payment-btn active p-category-toggle" onclick="selectPayment('cash')">
+                <div class="btn-text">{{ $keywords['Cash_on_delivery'] ?? __('Cash on delivery') }}</div>
+            </div>
+
+            @if($firstOnline)
+            <div class="payment-btn p-category-toggle" onclick="selectPayment('card')">
+                <div class="payment-icons">
+                    <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa">
+                    <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard">
+                </div>
+                <div class="btn-text">{{ $keywords['Card_payment'] ?? __('Card payment') }}</div>
+            </div>
+            @endif
+        </div>
+
+        {{-- Online Gateways List (Visible only when 'Card' is selected) --}}
+        <div id="online-gateways-selector" class="mb-4" style="display:none;">
+            <div class="row g-2">
+                @foreach($onlineList as $key)
+                    @if(isset($$key) && $$key->status == 1)
+                        <div class="col-6">
+                            <div class="payment-btn online-gateway-item p-2 h-auto" style="min-height: 50px;" 
+                                 onclick="selectGateway('{{ $key }}', 'online', this)"
+                                 data-action="{{ route('product.'.$key.'.submit', getParam()) }}">
+                                <div class="btn-text mt-0">{{ $keywords[ucfirst($key)] ?? __(ucfirst($key)) }}</div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Offline/Online Fields Container --}}
+        <div id="gateway-fields-container" class="content-box mb-4" style="display:none;">
+            {{-- This will contain fields like Stripe Element, etc. --}}
+            @includeIf('user-front.product.payment-gateways')
+        </div>
+
+        <input type="hidden" name="payment_method" id="paymentInput" value="cash">
+        <input type="hidden" name="gateway" id="gateway_internal" value="{{ $firstOffline ? $firstOffline->id : '' }}">
+
+
+    </form>
+</div>
+
+<div class="sticky-action-bar-container">
+    <div class="sticky-card shadow-lg">
+        <button type="submit" form="payment" class="btn-submit">{{ $keywords['Place Order'] ?? __('Place Order') }}</button>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 @endsection
 
 @section('script')
     <script src="https://js.stripe.com/v3/"></script>
     @includeIf('user-front.qrmenu.partials.scripts')
+    <script>
+        function selectServingMethod(method, el) {
+            $('.serving-method-toggle').removeClass('active');
+            $(el).addClass('active');
+            $(el).find('input').prop('checked', true);
+            
+            $('.serving-fields').hide();
+            $('#' + method + '_fields').show();
+            
+            // Trigger change for calcTotal
+            $("input[name='serving_method']").trigger('change');
+        }
+
+        function selectPayment(method) {
+            $('.p-category-toggle').removeClass('active');
+            if (method === 'cash') {
+                $('.p-category-toggle').eq(0).addClass('active');
+                $('#paymentInput').val('cash');
+                $('#gateway_internal').val('{{ $firstOffline ? $firstOffline->id : "" }}');
+                $('#payment').attr('action', "{{ $firstOffline ? route('product.offline.submit', [getParam(), $firstOffline->id]) : '' }}");
+                $('#online-gateways-selector').hide();
+                $('#gateway-fields-container').hide();
+            } else {
+                $('.p-category-toggle').eq(1).addClass('active');
+                $('#paymentInput').val('card');
+                $('#online-gateways-selector').show();
+                // If only one online gateway, auto-select it
+                if ($('.online-gateway-item').length === 1) {
+                    $('.online-gateway-item').first().click();
+                }
+            }
+        }
+
+        function selectGateway(id, type, el) {
+            $('.online-gateway-item').removeClass('active');
+            $(el).addClass('active');
+            
+            $('#gateway_internal').val(id);
+            $('#payment').attr('action', $(el).data('action'));
+            
+            $('#gateway-fields-container').show();
+            if (typeof showDetails === "function") {
+                showDetails(id === 'authorize.net' ? 'anet' : id);
+            }
+        }
+
+        $(document).ready(function() {
+            // Set default action for Cash on Delivery
+            selectPayment('cash');
+
+            // Force grand total update on load
+            if (typeof calcTotal === "function") {
+                calcTotal();
+            }
+            
+            setInterval(function() {
+                var gt = $('.grandTotal').first().text();
+                if (gt) $('.grandTotal').text(gt);
+            }, 500);
+        });
+    </script>
 @endsection

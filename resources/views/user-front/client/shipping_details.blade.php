@@ -2,151 +2,150 @@
     use App\Constants\Constant;
     use App\Http\Helpers\Uploader;
 @endphp
+
 @extends('user-front.layout')
 @section('pageHeading')
-    {{$keywords['Shipping Details'] ?? __('Shipping Details') }}
+    {{ $keywords['Shipping Details'] ?? __('Shipping Details') }}
 @endsection
 @section('content')
-    
-  <section class="page-title-area d-flex align-items-center"
-    style="background-image: url('{{ $userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg') }}');background-size:cover;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="page-title-item text-center">
-                        <h2 class="title">{{ $keywords['Shipping Details'] ?? __('Shipping Details') }}</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                 <li class="breadcrumb-item"><a href="{{route('user.client.dashboard',getParam())}}"><i
-                                            class="flaticon-home"></i>{{$keywords['Dashboard'] ?? __('Dashboard')}}</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    {{ $keywords['Shipping Details'] ?? __('Shipping Details') }}</li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-  
-    <section class="user-dashbord">
+
+    <section class="user-dashboard-area">
         <div class="container">
             <div class="row">
                 @include('user-front.client.inc.site_bar')
                 <div class="col-lg-9">
-                    <div class="row mb-5">
-                        <div class="col-lg-12">
-                            <div class="user-profile-details">
-                                <div class="account-info">
-                                    <div class="title">
-                                        <h4>{{ $keywords['Edit Shipping Details'] ?? __('Edit Shipping Details') }}</h4>
-                                    </div>
-                                    <div class="edit-info-area">
-                                        <form action="{{ route('user.client.shipping.update', getParam()) }}" method="POST"
-                                            enctype="multipart/form-data">
-                                            @csrf
+                    <div class="dashboard-content">
+                        <div class="premium-dashboard-card">
+                            <div class="card-header-icon">
+                                <i class="fas fa-truck"></i>
+                                <h3>{{ $keywords['Shipping Details'] ?? __('Shipping Details') }}</h3>
+                            </div>
 
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <input type="text" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping First Name'] ?? __('Shipping First Name') }}"
-                                                        name="shipping_fname" value="{{ $customer->shipping_fname }}">
-                                                    @error('shipping_fname')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <input type="text" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping Last Name'] ?? __('Shipping Last Name') }}"
-                                                        name="shipping_lname" value="{{ $customer->shipping_lname }}">
-                                                    @error('shipping_lname')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <input type="email" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping Email'] ?? __('Shipping Email') }}"
-                                                        name="shipping_email" value="{{ $customer->shipping_email }}">
-                                                    @error('shipping_email')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-6">
+                            @if (session()->has('success'))
+                                <div class="alert alert-success mt-3">
+                                    {{ session()->get('success') }}
+                                </div>
+                            @endif
 
-                                                    <div class="input-group mb-3">
+                            <div class="edit-profile-form mt-4">
+                                <form action="{{ route('user.client.shipping.update', getParam()) }}" method="POST">
+                                    @csrf
+
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['First Name'] ?? __('First Name') }}</label>
+                                                <input type="text" class="premium-input" name="shipping_fname"
+                                                    value="{{ $customer->shipping_fname }}" required>
+                                                @error('shipping_fname')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['Last Name'] ?? __('Last Name') }}</label>
+                                                <input type="text" class="premium-input" name="shipping_lname"
+                                                    value="{{ $customer->shipping_lname }}" required>
+                                                @error('shipping_lname')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['Email'] ?? __('Email') }}</label>
+                                                <input type="email" class="premium-input" name="shipping_email"
+                                                    value="{{ $customer->shipping_email }}" required>
+                                                @error('shipping_email')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['Phone'] ?? __('Phone') }}</label>
+                                                <div class="premium-phone-input">
+                                                    <div class="input-group">
                                                         <input type="hidden" name="shipping_country_code"
                                                             value="{{ !empty($customer->shipping_country_code) ? $customer->shipping_country_code : null }}">
                                                         <div class="input-group-prepend">
                                                             <button
-                                                                class="btn btn-outline-secondary dropdown-toggle shipping_country_code"
+                                                                class="premium-input btn-outline-secondary dropdown-toggle shipping_country_code"
                                                                 type="button" data-toggle="dropdown" aria-haspopup="true"
-                                                                aria-expanded="false">{{!empty($customer->shipping_country_code) ? $customer->shipping_country_code : $keywords['Select'] ?? __('Select')}}</button>
+                                                                aria-expanded="false">
+                                                                {{ !empty($customer->shipping_country_code) ? $customer->shipping_country_code : ($keywords['Select'] ?? __('Select')) }}
+                                                            </button>
                                                             <div class="dropdown-menu country-codes"
                                                                 id="shipping_country_code">
                                                                 @foreach ($ccodes as $ccode)
                                                                     <a class="dropdown-item"
                                                                         data-shipping_country_code="{{ $ccode['code'] }}"
-                                                                        href="#">{{ $ccode['name'] }}
+                                                                        href="javascript:void(0)">{{ $ccode['name'] }}
                                                                         ({{ $ccode['code'] }})</a>
                                                                 @endforeach
                                                             </div>
                                                         </div>
-                                                        <input type="text" name="shipping_number" class="form-control"
-                                                            placeholder="{{ $keywords['Shipping Phone'] ?? __('Shipping Phone') }}"
+                                                        <input type="text" name="shipping_number" class="premium-input"
+                                                            placeholder="{{ $keywords['Phone'] ?? __('Phone') }}"
                                                             value="{{ $customer->shipping_number }}">
                                                     </div>
-                                                    @error('shipping_country_code')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                    @error('shipping_number')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
                                                 </div>
-                                                <div class="col-lg-6">
-                                                    <input type="text" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping City'] ?? __('Shipping City') }}"
-                                                        name="shipping_city" value="{{ $customer->shipping_city }}">
-                                                    @error('shipping_city')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <input type="text" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping State'] ?? __('Shipping State') }}"
-                                                        name="shipping_state" value="{{ $customer->shipping_state }}">
-                                                    @error('shipping_state')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <input type="text" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping Country'] ?? __('Shipping Country') }}"
-                                                        name="shipping_country" value="{{ $customer->shipping_country }}">
-                                                    @error('shipping_country')
-                                                        <p class="text-danger mb-2">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-
-
-                                                <div class="col-lg-12">
-                                                    <textarea name="shipping_address" class="form_control"
-                                                        placeholder="{{ $keywords['Shipping Address'] ?? __('Shipping Address') }}">
-                                                              {{ $customer->shipping_address }}
-                                                    </textarea>
-                                                    @error('shipping_address')
-                                                        <p class="text-danger">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-lg-12">
-                                                    <div class="form-button">
-                                                        <button type="submit"
-                                                            class="btn form-btn">{{ $keywords['Submit'] ?? __('Submit') }}</button>
-                                                    </div>
-                                                </div>
+                                                @error('shipping_country_code')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                                @error('shipping_number')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
                                             </div>
-                                        </form>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['City'] ?? __('City') }}</label>
+                                                <input type="text" class="premium-input" name="shipping_city"
+                                                    value="{{ $customer->shipping_city }}">
+                                                @error('shipping_city')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['State'] ?? __('State') }}</label>
+                                                <input type="text" class="premium-input" name="shipping_state"
+                                                    value="{{ $customer->shipping_state }}">
+                                                @error('shipping_state')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['Country'] ?? __('Country') }}</label>
+                                                <input type="text" class="premium-input" name="shipping_country"
+                                                    value="{{ $customer->shipping_country }}">
+                                                @error('shipping_country')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 mb-4">
+                                            <div class="premium-input-group">
+                                                <label class="premium-label">{{ $keywords['Address'] ?? __('Address') }}</label>
+                                                <textarea name="shipping_address" class="premium-textarea" rows="3">{{ $customer->shipping_address }}</textarea>
+                                                @error('shipping_address')
+                                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <button type="submit" class="premium-save-btn">
+                                                <i class="fas fa-check-circle mr-2"></i>
+                                                {{ $keywords['Submit'] ?? __('Update Details') }}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -154,4 +153,174 @@
             </div>
         </div>
     </section>
+
+    <style>
+        :root {
+            --elak-primary: #0f5156;
+            --elak-bg: #f8fafc;
+            --elak-text: #1e293b;
+            --elak-muted: #64748b;
+        }
+
+        .user-dashboard-area {
+            background: var(--elak-bg);
+            padding: 40px 0 100px;
+            min-height: 80vh;
+        }
+
+        .premium-dashboard-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .card-header-icon {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 20px;
+        }
+
+        .card-header-icon i {
+            font-size: 1.5rem;
+            color: var(--elak-primary);
+            background: rgba(15, 81, 86, 0.08);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .card-header-icon h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--elak-text);
+            margin: 0;
+        }
+
+        /* Form Inputs */
+        .premium-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .premium-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--elak-muted);
+            margin-bottom: 0px;
+        }
+
+        .premium-input {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-weight: 600;
+            color: var(--elak-text);
+            transition: all 0.2s;
+        }
+
+        .premium-input:focus {
+            border-color: var(--elak-primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(15, 81, 86, 0.05);
+        }
+
+        .premium-textarea {
+            width: 100%;
+            padding: 15px 18px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-weight: 600;
+            transition: border-color 0.2s;
+        }
+
+        .premium-textarea:focus {
+            border-color: var(--elak-primary);
+            outline: none;
+        }
+
+        .premium-save-btn {
+            background: var(--elak-primary);
+            color: #fff;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .premium-save-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .premium-save-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Phone Input Group Fix */
+        .premium-phone-input .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .premium-phone-input .input-group-prepend {
+            margin-right: -1px;
+        }
+
+        .premium-phone-input .dropdown-toggle {
+            width: auto;
+            min-width: 100px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            background: #f8fafc;
+        }
+
+        .premium-phone-input .premium-input[name="shipping_number"] {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            flex: 1;
+        }
+
+        .premium-phone-input .dropdown-item {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 10px 20px;
+        }
+        
+        .premium-phone-input .dropdown-item:hover {
+            background: var(--elak-primary);
+            color: #fff;
+        }
+
+        @media (max-width: 576px) {
+            .premium-save-btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            $('.country-codes .dropdown-item').on('click', function() {
+                var code = $(this).data('shipping_country_code');
+                $(this).closest('.input-group').find('input[name="shipping_country_code"]').val(code);
+                $(this).closest('.input-group').find('.dropdown-toggle').text(code);
+            });
+        });
+    </script>
 @endsection

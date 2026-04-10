@@ -78,71 +78,66 @@ class OrderController extends Controller
         return view('user-front.client.order', $data);
     }
 
-    public function orderDetails($domain,$id)
+    public function orderDetails($domain, $id)
     {
-      
         $user = getUser();
-        $data = ProductOrder::query()
-            ->where('customer_id',Auth::guard('client')->user()->id)
-            ->where('user_id',$user->id)->with('orderItems')
-            ->find($id);     
- 
-        // if the order has no user_id (guest checkout), then no check
-        if (!empty($data->customer_id)) {
+        $order = ProductOrder::query()
+            ->where('customer_id', Auth::guard('client')->user()->id)
+            ->where('user_id', $user->id)->with('orderItems')
+            ->find($id);
+
+        if ($order && !empty($order->customer_id)) {
             if (Auth::guard('client')->check()
-            && Auth::guard('client')->user()->id != $data->customer_id)
-            {
+                && Auth::guard('client')->user()->id != $order->customer_id) {
                 return back();
             }
         }
 
-
-        if (Auth::guard('client')->user()->can('viewFront', $data)) {
+        if ($order && Auth::guard('client')->user()->can('viewFront', $order)) {
             $user = getUser();
             $currentLang = $this->getUserCurrentLanguage($user);
-            $bs = BasicSetting::query()
+            
+            // Pass $order as 'data' to match existing 600+ lines of view code
+            $data['data'] = $order;
+            $data['order'] = $order; 
+            
+            $data['bs'] = BasicSetting::query()
                 ->where('user_id', $user->id)
                 ->where('language_id', $currentLang->id)
+                ->first();
+            $data['be'] = \App\Models\User\BasicExtended::query()
+                ->where('user_id', $user->id)
+                ->where('language_id', $currentLang->id)
+                ->first();
+            $data['rtl'] = $currentLang->rtl;
+            $data['currentLang'] = $currentLang;
+            $data['userCurrentLang'] = $currentLang;
+            $data['keywords'] = json_decode($currentLang->keywords, true);
+            $data['activeTheme'] = $data['bs']->theme ?? null;
+            $data['allLanguageInfos'] = Language::query()
+                ->where('user_id', $user->id)
+                ->get();
+            $userMenu = Menu::query()
+                ->where('user_id', $user->id)
+                ->where('language_id', $currentLang->id)
+                ->first();
+            $data['userMenus'] = $userMenu ? $userMenu->menus : [];
+            $data['socialMediaInfos'] = Social::query()
+                ->where('user_id', $user->id)
+                ->get();
+            $data['packagePermissions'] = json_decode(UserPermissionHelper::packagePermission($user->id), true);
+            $data['userBex'] = BasicExtra::query()
+                ->where('user_id', $user->id)
+                ->first();
+            $data['upageHeading'] = PageHeading::query()
+                ->where('user_id', $user->id)
+                ->where('language_id', $currentLang->id)
+                ->first();
 
-        $data['bs'] = BasicSetting::query()
-            ->where('user_id', $user->id)
-            ->where('language_id', $currentLang->id)
-            ->first();
-        $data['be'] = \App\Models\User\BasicExtended::query()
-            ->where('user_id', $user->id)
-            ->where('language_id', $currentLang->id)
-            ->first();
-        $data['rtl'] = $currentLang->rtl;
-        $data['currentLang'] = $currentLang;
-        $data['userCurrentLang'] = $currentLang;
-        $data['keywords'] = json_decode($currentLang->keywords, true);
-        $data['activeTheme'] = $data['bs']->theme;
-        $data['allLanguageInfos'] = Language::query()
-            ->where('user_id', $user->id)
-            ->get();
-        $userMenu = Menu::query()
-            ->where('user_id', $user->id)
-            ->where('language_id', $currentLang->id)
-            ->first();
-        $data['userMenus'] = $userMenu ? $userMenu->menus : [];
-        $data['socialMediaInfos'] = Social::query()
-            ->where('user_id', $user->id)
-            ->get();
-        $data['packagePermissions'] = json_decode(UserPermissionHelper::packagePermission($user->id), true);
-        $data['userBex'] = BasicExtra::query()
-            ->where('user_id', $user->id)
-            ->first();
-        $data['upageHeading'] = PageHeading::query()
-            ->where('user_id', $user->id)
-            ->where('language_id', $currentLang->id)
-            ->first();
-
-        return view('user-front.client.order_details', $data);
+            return view('user-front.client.order_details', $data);
         }
- 
-        return abort(401);
-        
-        
+
+        return abort(404);
     }
     public function downloadFile($domain, Request $request){
         $user = getUser();

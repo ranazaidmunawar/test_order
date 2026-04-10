@@ -65,7 +65,7 @@
 <div class="modal fade bottom-sheet" id="productModal" tabindex="-1" aria-hidden="true"
     style="padding-left: 0 !important;">
     <div class="modal-dialog">
-        <div class="modal-content overflow-hidden border-0 bg-white shadow-lg">
+        <div class="modal-content  border-0 bg-white shadow-lg">
 
             <!-- Hero Image Section -->
             <div class="modal-product-hero">
@@ -270,9 +270,18 @@
 
     .modal.bottom-sheet .modal-content {
         border-radius: 24px 24px 0 0;
-        max-height: 90vh;
+        max-height: 92vh;
+        /* Slightly taller for better view */
         border: none;
-        overflow: hidden;
+        overflow-y: auto;
+        /* Enable vertical scroll */
+        scrollbar-width: none;
+        /* Hide scrollbar for clean look */
+        -ms-overflow-style: none;
+    }
+
+    .modal.bottom-sheet .modal-content::-webkit-scrollbar {
+        display: none;
     }
 
     .modal-product-hero {
@@ -285,6 +294,10 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+    }
+
+    .modal-additions-section {
+        padding-bottom: 120px !important;
     }
 
     .modal-close-btn,

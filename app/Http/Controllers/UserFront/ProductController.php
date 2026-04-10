@@ -538,7 +538,7 @@ class ProductController extends Controller
         }
 
         $userId = $user->id;
-        if ($request->type != 'guest' && !Auth::guard('client')->check()) {
+        if (!Auth::guard('client')->check()) {
             Session::put('link', route('user.product.front.checkout', getParam()));
             return redirect(route('user.client.login', [getParam(), 'redirected' => 'checkout']));
         }

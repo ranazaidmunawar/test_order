@@ -8,107 +8,80 @@
     {{ $keywords['Order'] ?? __('Order') }}
 @endsection
 @section('content')
-    <section class="page-title-area d-flex align-items-center"
-        style="background-image: url('{{ $userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg') }}');background-size:cover;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="page-title-item text-center">
-                        <h2 class="title">{{ $keywords['My Orders'] ?? __('My Orders') }}</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('user.client.dashboard', getParam()) }}"><i
-                                            class="flaticon-home"></i>{{ $keywords['Dashboard'] ?? __('Dashboard') }}</a>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    {{ $keywords['My Orders'] ?? __('My Order') }}
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <section class="user-dashbord content mt-5">
+    <section class="user-dashboard-area">
         <div class="container">
             <div class="row">
                 @include('user-front.client.inc.site_bar')
                 <div class="col-lg-9">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="user-profile-details">
-                                <div class="account-info">
-                                    <div class="title">
-                                        <h4>{{ $keywords['All Orders'] ?? __('All Orders') }}</h4>
-                                    </div>
-                                    <div class="main-info">
-                                        <div class="main-table">
-                                            <div class="table-responsive">
-                                                <table id="example"
-                                                    class="dataTables_wrapper dt-responsive table-striped dt-bootstrap4 w-100">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>{{ $keywords['Order Number'] ?? __('Order Number') }}</th>
-                                                            <th>{{ $keywords['Type'] ?? __('Type') }}</th>
-                                                            <th>{{ $keywords['Serving_Method'] ?? __('Serving Method') }}
-                                                            </th>
-                                                            <th>{{ $keywords['Date'] ?? __('Date') }}</th>
-                                                            <th>{{ $keywords['Total Price'] ?? __('Total Price') }}</th>
-                                                            <th>{{ $keywords['Action'] ?? __('Action') }}</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @if (count($orders) > 0)
-                                                            @foreach ($orders as $order)
-                                                                <tr>
-                                                                    <td>{{ $order->order_number }}</td>
-                                                                    <td>
-                                                                        @if ($order->type == 'website')
-                                                                            {{ $keywords['Website'] ?? __('Website') }}
-                                                                        @elseif ($order->type == 'qr')
-                                                                            {{ $keywords['QR'] ?? __('QR') }}
-                                                                        @endif
-                                                                    </td>
-                                                                    <td>
-                                                                        @if ($order->serving_method == 'on_table')
-                                                                            {{ $keywords['On Table'] ?? __('On Table') }}
-                                                                        @elseif ($order->serving_method == 'home_delivery')
-                                                                            {{ $keywords['Home Delivery'] ?? __('Home Delivery') }}
-                                                                        @elseif ($order->serving_method == 'pick_up')
-                                                                            {{ $keywords['Pick Up'] ?? __('Pick Up') }}
-                                                                        @endif
-                                                                    </td>
-                                                                    <td>{{ $order->created_at->format('d-m-Y') }}</td>
-                                                                    <td>{{ $order->currency_symbol_position == 'left' ? $order->currency_symbol : '' }}
-                                                                        {{ $order->total }}
-                                                                        {{ $order->currency_symbol_position == 'right' ? $order->currency_symbol : '' }}
-                                                                    </td>
-                                                                    <td>
-                                                                        <a href="{{ route('user.client.orders.details', [getParam(), $order->id]) }}"
-                                                                            class="btn">
-                                                                            {{ $keywords['Details'] ?? __('Details') }}
-                                                                        </a>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        @else
-                                                            <tr class="text-center">
-                                                                <td colspan="12">
-                                                                    {{ $keywords['No Orders'] ?? __('No Orders') }}
-                                                                </td>
-                                                            </tr>
-                                                        @endif
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            {{ $orders->links() }}
-                                        </div>
-                                    </div>
+                    <div class="dashboard-content">
+                        <!-- All Orders Table Card -->
+                        <div class="premium-dashboard-card">
+                            <div class="card-header-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                                <h3>{{ $keywords['All Orders'] ?? __('My Orders') }}</h3>
+                            </div>
+                            <div class="table-container mt-3">
+                                <div class="table-responsiv">
+                                    <table id="example" class="premium-table w-100">
+                                        <thead>
+                                            <tr>
+                                                <th>{{ $keywords['Order'] ?? __('Order #') }}</th>
+                                                <th>{{ $keywords['Type'] ?? __('Type') }}</th>
+                                                <th>{{ $keywords['Method'] ?? __('Method') }}</th>
+                                                <th>{{ $keywords['Date'] ?? __('Date') }}</th>
+                                                <th>{{ $keywords['Total Price'] ?? __('Total') }}</th>
+                                                <th>{{ $keywords['Action'] ?? __('Action') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if ($orders && $orders->count() > 0)
+                                                @foreach ($orders as $order)
+                                                    <tr>
+                                                        <td class="fw-bold text-dark">#{{ $order->order_number }}</td>
+                                                        <td>
+                                                            <span class="type-badge">
+                                                                {{ $order->type == 'website' ? ($keywords['Website'] ?? __('Website')) : ($keywords['QR'] ?? __('QR')) }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            @php
+                                                                $method = $order->serving_method;
+                                                                $methodText = '';
+                                                                if($method == 'on_table') $methodText = $keywords['On Table'] ?? __('On Table');
+                                                                elseif($method == 'home_delivery') $methodText = $keywords['Home Delivery'] ?? __('Home Delivery');
+                                                                elseif($method == 'pick_up') $methodText = $keywords['Pick Up'] ?? __('Pick Up');
+                                                            @endphp
+                                                            {{ $methodText }}
+                                                        </td>
+                                                        <td class="text-muted">{{ $order->created_at->format('d M, Y') }}</td>
+                                                        <td class="fw-800 text-dark">
+                                                            {{ $order->currency_symbol_position == 'left' ? $order->currency_symbol : '' }}
+                                                            {{ $order->total }}
+                                                            {{ $order->currency_symbol_position == 'right' ? $order->currency_symbol : '' }}
+                                                        </td>
+                                                        <td>
+                                                            <a href="{{ route('user.client.orders.details', [getParam(), $order->id]) }}"
+                                                                class="details-btn">
+                                                                {{ $keywords['View'] ?? __('View') }}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="6" class="text-center py-5">
+                                                        <div class="empty-state">
+                                                            <i class="fas fa-shopping-cart mb-3 opacity-25" style="font-size: 3rem;"></i>
+                                                            <p class="text-muted">{{ $keywords['No Orders Found'] ?? __('No orders found') }}</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="premium-pagination mt-4">
+                                    {{ $orders->links() }}
                                 </div>
                             </div>
                         </div>
@@ -117,5 +90,146 @@
             </div>
         </div>
     </section>
+
+    <style>
+        :root {
+            --elak-primary: #0f5156;
+            --elak-bg: #f8fafc;
+            --elak-text: #1e293b;
+            --elak-muted: #64748b;
+        }
+
+        .user-dashboard-area {
+            background: var(--elak-bg);
+            padding: 40px 0 100px;
+            min-height: 80vh;
+        }
+
+        .premium-dashboard-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .card-header-icon {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 20px;
+        }
+
+        .card-header-icon i {
+            font-size: 1.5rem;
+            color: var(--elak-primary);
+            background: rgba(15, 81, 86, 0.08);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .card-header-icon h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--elak-text);
+            margin: 0;
+        }
+
+        /* Table Styling */
+        .premium-table {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .premium-table thead th {
+            background: transparent;
+            color: var(--elak-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border: none;
+            padding: 10px 15px;
+        }
+
+        .premium-table tbody tr {
+            transition: transform 0.2s;
+        }
+
+        .premium-table tbody td {
+            background: #fff;
+            padding: 15px;
+            font-size: 0.9rem;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .premium-table tbody td:first-child {
+            border-left: 1px solid #f1f5f9;
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+
+        .premium-table tbody td:last-child {
+            border-right: 1px solid #f1f5f9;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        .type-badge {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--elak-muted);
+        }
+
+        .details-btn {
+            background: var(--elak-primary);
+            color: #fff !important;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-decoration: none !important;
+            transition: opacity 0.2s;
+            display: inline-block;
+        }
+
+        .details-btn:hover {
+            opacity: 0.9;
+        }
+
+        .fw-800 { font-weight: 800; }
+
+        /* Pagination override */
+        .premium-pagination .pagination {
+            justify-content: center;
+            gap: 5px;
+        }
+        .premium-pagination .page-link {
+            border-radius: 8px !important;
+            border: none;
+            color: var(--elak-text);
+            font-weight: 600;
+            padding: 8px 16px;
+        }
+        .premium-pagination .page-item.active .page-link {
+            background: var(--elak-primary);
+            color: #fff;
+        }
+
+        @media (max-width: 991px) {
+            .dashboard-content { margin-top: 20px; }
+            .user-dashboard-area { padding: 20px 0 60px; }
+        }
+    </style>
 
 @endsection

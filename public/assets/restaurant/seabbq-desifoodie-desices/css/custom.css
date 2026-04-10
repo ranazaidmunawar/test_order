@@ -246,6 +246,7 @@ body {
     color: var(--primary-color);
     font-weight: 700;
     font-size: 1.1rem;
+    text-align: end;
 }
 
 .add-btn {
