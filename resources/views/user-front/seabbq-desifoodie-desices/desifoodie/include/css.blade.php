@@ -26,7 +26,7 @@
 <!-- bootstrap CSS -->
 <link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/vendor/bootstrap.min.css">
 
-<link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/custom.css">
+<link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/custom.css') }}?v=1.1">
 
 
 <!-- main style CSS -->

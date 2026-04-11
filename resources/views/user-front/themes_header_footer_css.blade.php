@@ -80,7 +80,7 @@
         <link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/vendor/all.min.css">
         <link rel="stylesheet"
             href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/vendor/nice-select.css">
-        <link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/inner-common.css">
+        <link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/inner-common.css') }}?v=1.1">
 
         @if ($activeTheme == 'seabbq')
             <link rel="stylesheet"

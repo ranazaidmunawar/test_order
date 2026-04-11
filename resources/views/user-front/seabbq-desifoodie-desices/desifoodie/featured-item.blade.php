@@ -526,15 +526,20 @@
         box-shadow: 0 4px 10px rgba(10, 74, 79, 0.1);
     }
 
+
+
     /* Sticky Footer - Solid Bottom Block (SS Style Refinement) */
     .modal-sticky-footer {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: #0a4a4f; /* Green background block */
-        padding: 15px 15px 35px; /* Padding for pills and bottom spacing */
-        border-radius: 25px 25px 0 0; /* Rounded top corners only */
+        background: #0a4a4f;
+        /* Green background block */
+        padding: 15px 15px 35px;
+        /* Padding for pills and bottom spacing */
+        border-radius: 25px 25px 0 0;
+        /* Rounded top corners only */
         z-index: 1060;
         display: flex;
         align-items: center;
