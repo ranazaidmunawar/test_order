@@ -1612,7 +1612,7 @@ ul.login a {
 }
 
 .page-title-area .page-title-item .title {
-    color: #fff;
+    /* color: #fff; */
     font-family: "Playfair Display", serif;
     font-weight: 900;
     font-size: 80px;

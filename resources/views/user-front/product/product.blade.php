@@ -14,7 +14,6 @@
 
 @section('content')
 
-    @include('user-front.breadcrum', ['title' => $upageHeading?->menu_page_title])
 
 
     <section class="food-menu-area food-menu-2-area food-menu-3-area pt-90">

@@ -12,9 +12,9 @@
 @section('meta-description', !empty($userSeo) ? $userSeo->product_meta_description : '')
 @section('content')
 
-    <!-- @include('user-front.breadcrum', ['title' => $upageHeading?->items_page_title]) -->
+    @include('user-front.breadcrum', ['title' => $upageHeading?->items_page_title])
 
-    <div class="shop-bar-area pt-60">
+    <div class="shop-bar-area pt-120">
         <div class="container">
             <div class="row">
                 <div class="col-lg-3">

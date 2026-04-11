@@ -31,24 +31,30 @@
                     <h5 class="fw-bold mb-3 px-2 border-start border-4 border-primary ps-2">
                         {{ convertUtf8($category->name) }}
                     </h5>
-                    <div class="row">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
                         @foreach ($category_products as $productInfo)
-                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                                <div class="product-card" onclick="openProductModal({{ $productInfo->toJson() }})">
-                                    <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $productInfo->feature_image, $userBs) }}"
-                                        class="product-image" alt="{{ convertUtf8($productInfo->title) }}">
-                                    <div class="product-details ">
-                                        <h6 class="product-title">{{ convertUtf8($productInfo->title) }}</h6>
-                                        <p class="product-desc mb-2">
-                                            {{ convertUtf8($productInfo->summary ?? $productInfo->description) }}
-                                        </p>
-                                        <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
+                            <div class="col mb-2">
+                                <div class="premium-product-card" onclick="openProductModal({{ $productInfo->toJson() }})">
+                                    <div class="product-img-box">
+                                        <img src="{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, $productInfo->feature_image, $userBs) }}"
+                                            class="product-image" alt="{{ convertUtf8($productInfo->title) }}">
+                                    </div>
+                                    <div class="product-info-box">
+                                        <div class="info-top">
+                                            <h6 class="product-title">{{ convertUtf8($productInfo->title) }}</h6>
+                                            <p class="product-desc">
+                                                {{ \Illuminate\Support\Str::words(convertUtf8($productInfo->summary ?? $productInfo->description), 15, '...') }}
+                                            </p>
+                                        </div>
+                                        <div class="info-bottom">
                                             <span class="product-price">
                                                 {{ $userBe->base_currency_symbol_position == 'left' ? $userBe->base_currency_symbol : '' }}{{ number_format($productInfo->current_price, 2) }}{{ $userBe->base_currency_symbol_position == 'right' ? $userBe->base_currency_symbol : '' }}
                                             </span>
-                                            <button class="add-btn shadow-sm">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
+                                            <div class="add-btn-wrapper">
+                                                <button class="premium-add-btn">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -83,7 +89,7 @@
                     style="width: 40px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 2px;"></div>
             </div>
 
-            <div class="modal-additions-section p-3 text-center">
+            <div class="modal-additions-section p-3 text-end">
                 <div class="mb-4">
                     <h4 id="modalTitle" class="fw-bold mb-1 fs-4"></h4>
                     <p id="modalDesc" class="text-muted small mb-0"></p>
@@ -92,33 +98,26 @@
                 <hr class="opacity-10 my-3">
 
                 <!-- Variations Container -->
-                <div id="variationsContainer" class="mb-4 text-center"></div>
+                <div id="variationsContainer" class="mb-4 text-end"></div>
 
                 <!-- Addons Container -->
-                <div id="addonsContainer" class="mb-5 text-center">
+                <div id="addonsContainer" class="mb-5 text-end">
                     <h6 class="fw-bold mb-3">{{ $keywords['Addons'] ?? __('Addons') }}</h6>
-                    <div class="d-flex flex-wrap justify-content-center gap-2"></div>
+                    <div class="d-flex flex-wrap justify-content-end gap-2"></div>
                 </div>
             </div>
 
-            <!-- Sticky Footer - Premium Bar Design (Full Width) -->
+            <!-- Sticky Footer - Premium Bar Design (SS Style) -->
             <div class="modal-sticky-footer">
-                <div class="add-to-cart-bar shadow-sm">
-                    <div class="price-side">
-                        <span id="modalTotalBtn">0.00</span>
-                    </div>
-
-                    <div class="action-side" id="elakAddToCartBtn" onclick="elakAddToCart()">
-                        <span id="addToCartText">{{ $keywords['Add to Cart'] ?? __('Add to Cart') }}</span>
-                    </div>
-
-                    <div class="qty-side">
-                        <button type="button" class="qty-btn-circle" onclick="elakUpdateQty(1)"><i
-                                class="fas fa-plus"></i></button>
-                        <input type="text" id="qtyInput" value="1" readonly class="qty-input-text">
-                        <button type="button" class="qty-btn-circle" onclick="elakUpdateQty(-1)"><i
-                                class="fas fa-minus"></i></button>
-                    </div>
+                <div class="footer-btn-main" onclick="elakAddToCart()" id="elakAddToCartBtn">
+                    <span id="modalTotalBtn" class="price-val">0.00</span>
+                    <span id="addToCartText" class="add-text">Add to Cart</span>
+                </div>
+                <div class="footer-qty-wrap">
+                    <button class="qty-trigger" onclick="elakUpdateQty(1)">+</button>
+                    <span class="qty-num" id="qtyDisplay">1</span>
+                    <button class="qty-trigger" onclick="elakUpdateQty(-1)">-</button>
+                    <input type="hidden" id="qtyInput" value="1">
                 </div>
             </div>
         </div>
@@ -126,15 +125,18 @@
 </div>
 
 <style>
-    /* Category Scroller - Premium Minimal */
+    /* Category Scroller - Premium Minimal (SS 2 style) */
     .category-scroller {
         white-space: nowrap;
         background: white !important;
         overflow-x: auto;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        padding: 12px 10px;
+        padding: 15px 10px;
         -ms-overflow-style: none;
         scrollbar-width: none;
+        position: sticky;
+        top: 0;
+        z-index: 1020;
     }
 
     .category-scroller::-webkit-scrollbar {
@@ -149,102 +151,279 @@
         background: #f8f9fb;
         color: #4b5563;
         text-decoration: none !important;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid #e5e7eb;
         font-weight: 500;
         font-size: 13px;
         margin-right: 8px;
     }
 
+    .category-pill i {
+        font-size: 14px;
+        margin-right: 6px;
+    }
+
     .category-pill img {
-        width: 22px;
-        height: 22px;
-        object-fit: contain;
+        width: 20px;
+        height: 20px;
+        object-fit: cover;
         margin-right: 8px;
         border-radius: 50%;
     }
 
     .category-pill.active {
-        background: #0a4a4f !important;
+        background: #0d5c53 !important;
         color: white !important;
-        border-color: #0a4a4f;
-        box-shadow: 0 4px 12px rgba(10, 74, 79, 0.2);
+        border-color: #0d5c53;
+        box-shadow: 0 4px 12px rgba(13, 92, 83, 0.2);
     }
 
-    /* Product Cards - Centered & Clean (SS 2 style) */
-    .product-card {
-        background: white;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-        cursor: pointer;
-        height: 100%;
-        border: 1px solid rgba(0, 0, 0, 0.02);
+    /* Section Headings */
+    .cat-section h5 {
+        color: #0d5c53;
+        font-weight: 700;
+        font-size: 1.2rem;
+        padding: 10px 0;
+        margin-bottom: 5px;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        gap: 10px;
     }
 
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    .cat-section h5::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 22px;
+        background: #d4af37;
+        border-radius: 2px;
+    }
+
+    /* Premium Product Cards (Mixed Layout) */
+    .premium-product-card {
+        background: white;
+        border-radius: 18px;
+        display: flex;
+        flex-direction: row;
+        /* Default Mobile: Row Layout */
+        overflow: hidden;
+        border: 1px solid #f1f1f1;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+        height: 140px;
+        cursor: pointer;
+        padding: 10px;
+        gap: 12px;
+    }
+
+    .premium-product-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .product-img-box {
+        flex: 0 0 120px;
+        height: 120px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8f8f8;
     }
 
     .product-image {
         width: 100%;
-        height: 180px;
+        height: 100%;
         object-fit: cover;
     }
 
-    .product-details {
-        padding: 20px;
-        text-align: center;
-        flex-grow: 1;
+    .product-info-box {
+        flex: 1;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
+        padding: 4px 0;
     }
 
     .product-title {
         font-weight: 700;
-        font-size: 16px;
-        color: #111;
-        margin-bottom: 6px;
-    }
-
-    .product-desc {
-        font-size: 12px;
-        color: #6b7280;
-        line-height: 1.5;
-        margin-bottom: 12px;
-        height: 36px;
-        overflow: hidden;
+        font-size: 15px;
+        color: #0d5c53;
+        margin-bottom: 2px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-desc {
+        font-size: 11px;
+        color: #777;
+        line-height: 1.4;
+        margin-bottom: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-height: 32px;
+    }
+
+    .info-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
     }
 
     .product-price {
         font-weight: 800;
-        color: #0a4a4f;
-        font-size: 17px;
+        font-size: 16px;
+        color: #0d5c53;
     }
 
-    .add-btn {
-        width: 36px;
-        height: 36px;
+    .premium-add-btn {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: #eef7f6;
-        color: #0a4a4f;
+        color: #0d5c53;
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(13, 92, 83, 0.1);
         transition: all 0.2s;
     }
 
-    .add-btn:hover {
-        background: #0a4a4f;
+    .premium-product-card:hover .premium-add-btn {
+        background: #0d5c53;
         color: white;
+    }
+
+    /* Desktop View Redefinition */
+    @media (min-width: 992px) {
+        .premium-product-card {
+            flex-direction: column;
+            /* Vertical Layout for Desktop */
+            height: 100%;
+            padding: 12px;
+            gap: 0;
+            border-radius: 28px;
+            text-align: center;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .premium-product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-img-box {
+            flex: 0 0 220px;
+            height: 220px;
+            width: 100%;
+            border-radius: 22px;
+            margin-bottom: 20px;
+            background: #f7f7f7;
+            /* SS2 background behind image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 0px;
+            /* Adjust if image should have border */
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .premium-product-card:hover .product-image {
+            transform: scale(1.08);
+        }
+
+        .product-info-box {
+            padding: 0 10px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0d5c53;
+            margin-bottom: 8px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .product-desc {
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: center;
+            height: 40px;
+            color: #888;
+            max-width: 90%;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-bottom {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-top: auto;
+            position: relative;
+        }
+
+        .product-price {
+            font-size: 19px;
+            font-weight: 900;
+            color: #0d5c53;
+            letter-spacing: -0.5px;
+        }
+
+        .add-btn-wrapper {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+        }
+
+        .premium-add-btn {
+            width: 44px;
+            height: 44px;
+            font-size: 16px;
+            background: #0d5c53 !important;
+            /* Solid dark teal as per SS2 */
+            color: white !important;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(13, 92, 83, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .premium-add-btn:hover {
+            transform: scale(1.15) rotate(90deg);
+            background: #0a4a4f !important;
+        }
     }
 
     /* Modal Styling - Rounded Rect Pillars */
@@ -286,7 +465,8 @@
 
     .modal-product-hero {
         position: relative;
-        height: 260px;
+        height: 200px;
+        /* Reduced height for SS2 look */
         background: #fff;
     }
 
@@ -297,7 +477,8 @@
     }
 
     .modal-additions-section {
-        padding-bottom: 120px !important;
+        padding: 15px 20px 100px !important;
+        /* Tightened padding */
     }
 
     .modal-close-btn,
@@ -345,29 +526,86 @@
         box-shadow: 0 4px 10px rgba(10, 74, 79, 0.1);
     }
 
-    /* Sticky Footer - Full Width Stretch */
+    /* Sticky Footer - Solid Bottom Block (SS Style Refinement) */
     .modal-sticky-footer {
-        position: sticky;
+        position: absolute;
         bottom: 0;
-        width: 100%;
-        padding: 12px 14px 28px;
-        /* Reduced side padding for 'full width' feel */
-        background: white;
-        z-index: 100;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .add-to-cart-bar {
-        background: #0a4a4f;
-        border-radius: 12px;
+        left: 0;
+        right: 0;
+        background: #0a4a4f; /* Green background block */
+        padding: 15px 15px 35px; /* Padding for pills and bottom spacing */
+        border-radius: 25px 25px 0 0; /* Rounded top corners only */
+        z-index: 1060;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        color: white;
-        height: 64px;
-        padding: 0 8px;
-        box-shadow: 0 8px 20px rgba(10, 74, 79, 0.25);
-        width: 100%;
+        gap: 10px;
+        box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .footer-btn-main {
+        flex: 1;
+        background: white;
+        height: 52px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        color: #0a4a4f;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .footer-btn-main .price-val {
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    .footer-btn-main .add-text {
+        font-weight: 700;
+        font-size: 0.95rem;
+        flex: 1;
+        text-align: center;
+    }
+
+    .footer-qty-wrap {
+        background: white;
+        height: 52px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 4px;
+        gap: 8px;
+        color: #0a4a4f;
+        min-width: 140px;
+        justify-content: space-between;
+    }
+
+    .footer-qty-wrap .qty-trigger {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: #0a4a4f;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .footer-qty-wrap .qty-trigger:active {
+        transform: scale(0.85);
+    }
+
+    .footer-qty-wrap .qty-num {
+        font-weight: 800;
+        font-size: 1.15rem;
+        min-width: 20px;
+        text-align: center;
     }
 
     .price-side {
@@ -466,11 +704,16 @@
 
         // Update UI
         document.getElementById('modalTitle').innerText = product.title || product.name;
-        document.getElementById('modalDesc').innerText = product.summary || product.description || '';
+        // Limit description to 15 words for a cleaner modal look
+        const fullDesc = product.summary || product.description || '';
+        const words = fullDesc.split(/\s+/);
+        const limitedDesc = words.length > 15 ? words.slice(0, 15).join(' ') + '...' : fullDesc;
+        document.getElementById('modalDesc').innerText = limitedDesc;
 
         const imgUrl = "{{ Uploader::getImageUrl(Constant::WEBSITE_PRODUCT_FEATURED_IMAGE, ':img', $userBs) }}".replace(':img', currentProduct.feature_image);
         document.getElementById('modalImg').src = imgUrl;
         document.getElementById('qtyInput').value = currentQty;
+        document.getElementById('qtyDisplay').innerText = currentQty;
 
         // Render Variations
         const varContainer = document.getElementById('variationsContainer');
@@ -484,7 +727,7 @@
                     section.innerHTML = `<h6 class="fw-bold mb-2">${vName.replace(/_/g, ' ')}</h6>`;
 
                     const optionsDiv = document.createElement('div');
-                    optionsDiv.className = 'd-flex flex-wrap justify-content-center gap-2';
+                    optionsDiv.className = 'd-flex flex-wrap justify-content-end gap-2';
 
                     vOptions.forEach(opt => {
                         const pill = document.createElement('span');
@@ -554,6 +797,7 @@
         currentQty += delta;
         if (currentQty < 1) currentQty = 1;
         document.getElementById('qtyInput').value = currentQty;
+        document.getElementById('qtyDisplay').innerText = currentQty;
         elakCalculateTotal();
     }
 
