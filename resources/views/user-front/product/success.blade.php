@@ -10,8 +10,9 @@
 @section('content')
 
 
-    <section class="page-title-area d-flex align-items-center lazy"
-        data-bg="{{$userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg')}}">
+    <section class="page-title-area d-flex align-items-center lazy">
+        <!-- <section class="page-title-area d-flex align-items-center lazy"
+                data-bg="{{$userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg')}}"> -->
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
