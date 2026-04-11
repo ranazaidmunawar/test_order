@@ -11,8 +11,9 @@
 @section('meta-description', "$blog->meta_description")
 @section('content')
 
-    <section class="page-title-area d-flex align-items-center"
-        style="background-image: url('{{ $userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg') }}');background-size:cover;">
+    <section class="page-title-area d-flex align-items-center">
+        <!-- <section class="page-title-area d-flex align-items-center"
+            style="background-image: url('{{ $userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg') }}');background-size:cover;"> -->
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
@@ -59,8 +60,7 @@
                                 <span>{{ $keywords['Share'] ?? __('Share') }} :</span>
                                 <ul>
                                     <li>
-                                        <a
-                                            href="//www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"><i
+                                        <a href="//www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"><i
                                                 class="fab fa-facebook-f"></i></a>
                                     </li>
                                     <li>
@@ -97,7 +97,8 @@
                             <div class="blog-cat-list pl-45 pr-45">
                                 <ul>
                                     @foreach ($bcats as $key => $bcat)
-                                        <li class="single-category @if (request()->input('category') == $bcat->id) active @endif">
+                                        <li
+                                            class="single-category @if (request()->input('category') == $bcat->id) active @endif">
                                             <a
                                                 href="{{ route('user.front.blogs', [getParam(), 'term' => request()->input('term'), 'category' => $bcat->id]) }}">{{ convertUtf8(convertUtf8($bcat->name)) }}</a>
                                         </li>
@@ -112,5 +113,3 @@
     </section>
 
 @endsection
-
-
