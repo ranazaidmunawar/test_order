@@ -97,7 +97,7 @@ span.cookie-consent__message {
 #variationModal .modal-title small {
     font-weight: 700;
     font-size: 20px !important;
-    color: var(--color-primary) !important;
+    color: #0a4a4f !important;
 }
 
 #variationModal .modal-content {
@@ -106,8 +106,8 @@ span.cookie-consent__message {
 }
 
 #variationModal .modal-header button {
-    background-color: var(--color-primary);
-    border: 1px solid var(--color-primary);
+    background-color: #0a4a4f;
+    border: 1px solid #0a4a4f;
     font-size: 20px !important;
     width: 30px;
     height: 30px;
@@ -129,9 +129,9 @@ span.cookie-consent__message {
 }
 
 .modal-quantity span {
-       font-size: 20px;
+    font-size: 20px;
     cursor: pointer;
-    color: var(--color-primary);
+    color: #0a4a4f;
 }
 
 .modal-quantity input {
@@ -807,7 +807,7 @@ button.modal-cart-link i.fa-spinner,
 
 /* Tooltip CSS */
 .tooltip {
-    --bs-tooltip-bg: var(--color-primary);
+    --bs-tooltip-bg: #0a4a4f;
     --bs-tooltip-padding-x: 10px;
     --bs-tooltip-padding-y: 5px;
     --bs-tooltip-font-size: var(--font-xsm);
@@ -821,7 +821,7 @@ button.modal-cart-link i.fa-spinner,
 }
 
 .tooltip .tooltip-inner {
-    background-color: var(--color-primary);
+    background-color: #0a4a4f;
 }
 
 @media (max-width: 1199px) {

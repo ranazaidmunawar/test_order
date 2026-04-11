@@ -253,8 +253,19 @@
         </a>
     </div>
 
-      <form method="POST" id="payment" enctype="multipart/form-data">
+      <form method="POST" id="payment" action="{{ route('product.offline.submit', [getParam(), 'cash']) }}" enctype="multipart/form-data">
         @csrf
+
+        @if ($errors->any())
+            <div class="alert alert-danger shadow-sm rounded-3">
+                <ul class="mb-0 ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <input type="hidden" name="ordered_from" value="website">
 
         <!-- Serving Methods -->
@@ -576,7 +587,7 @@
         </div>
 
         <input type="hidden" name="payment_method" id="paymentInput" value="cash">
-        <input type="hidden" name="gateway" id="gateway_internal" value="{{ $firstOffline ? $firstOffline->id : '' }}">
+        <input type="hidden" name="gateway" id="gateway_internal" value="cash">
 
 
     </form>
@@ -620,8 +631,8 @@
             if (method === 'cash') {
                 $('.p-category-toggle').eq(0).addClass('active');
                 $('#paymentInput').val('cash');
-                $('#gateway_internal').val('{{ $firstOffline ? $firstOffline->id : "" }}');
-                $('#payment').attr('action', "{{ $firstOffline ? route('product.offline.submit', [getParam(), $firstOffline->id]) : '' }}");
+                $('#gateway_internal').val('cash');
+                $('#payment').attr('action', "{{ route('product.offline.submit', [getParam(), 'cash']) }}");
                 $('#online-gateways-selector').hide();
                 $('#gateway-fields-container').hide();
             } else {

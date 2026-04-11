@@ -28,7 +28,7 @@ class OfflineController extends PaymentController
 
         if ($request->serving_method == 'home_delivery') {
             if ($bs->postal_code == 0) {
-                if ($request->has('shipping_charge')) {
+                if ($request->filled('shipping_charge')) {
                     $shipping = ShippingCharge::query()
                         ->where('user_id',$user->id)
                         ->findOrFail($request->shipping_charge);
@@ -38,10 +38,15 @@ class OfflineController extends PaymentController
                     $shipping_charge = 0;
                 }
             } else {
-                $shipping = PostalCode::query()
-                    ->where('user_id',$user->id)
-                    ->findOrFail($request->postal_code);
-                $shipping_charge = $shipping->charge;
+                if ($request->filled('postal_code')) {
+                    $shipping = PostalCode::query()
+                        ->where('user_id',$user->id)
+                        ->findOrFail($request->postal_code);
+                    $shipping_charge = $shipping->charge;
+                } else {
+                    $shipping = NULL;
+                    $shipping_charge = 0;
+                }
             }
             if (!empty($shipping) && !empty($shipping->free_delivery_amount) && cartTotal() >= $shipping->free_delivery_amount) {
                 $shipping_charge = 0;
@@ -55,7 +60,13 @@ class OfflineController extends PaymentController
         // save order
         $txnId = 'txn_' . Str::random(8) . time();
         $chargeId = 'ch_' . Str::random(9) . time();
-        $order = $this->saveOrder($request, $shipping, $total, $txnId, $chargeId, 'offline');
+        
+        $gtype = 'offline';
+        if ($request->gateway == 'cash' || $gatewayid == 'cash') {
+            $gtype = 'cash_on_delivery';
+        }
+
+        $order = $this->saveOrder($request, $shipping, $total, $txnId, $chargeId, $gtype);
         $order_id = $order->id;
 
 

@@ -266,15 +266,15 @@ class PaymentController extends Controller
             'serving_method' => 'required|sometimes',
             'shipping_fname' => 'required|sometimes',
             'shipping_lname' => 'required|sometimes',
-            'shipping_address' => 'required|sometimes',
+            // 'shipping_address' => 'required|sometimes',
             'shipping_city' => 'required|sometimes',
             'shipping_country' => 'required|sometimes',
             'shipping_country_code' => 'required|sometimes',
             'shipping_number' => 'required|sometimes',
             'shipping_email' => 'required|sometimes',
-            'pick_up_date' => 'required|sometimes',
-            'pick_up_time' => 'required|sometimes',
-            'table_number' => 'required|sometimes',
+            // 'pick_up_date' => 'required|sometimes',
+            // 'pick_up_time' => 'required|sometimes',
+            // 'table_number' => 'required|sometimes',
             'shipping_charge' => 'required|sometimes',
             'cardNumber' => 'required|sometimes',
             'cardCVC' => 'required|sometimes',
@@ -299,9 +299,9 @@ class PaymentController extends Controller
         }
 
 
-        if ($request->serving_method == 'home_delivery' && $bs->postal_code == 1) {
-            $rules['postal_code'] = 'required';
-        }
+        // if ($request->serving_method == 'home_delivery' && $bs->postal_code == 1) {
+        //     $rules['postal_code'] = 'required';
+        // }
 
         // return $request;
         // delivery date & time validation
@@ -348,8 +348,8 @@ class PaymentController extends Controller
 
 
         $onCount = PaymentGateway::query()->where('user_id', $user->id)->where('keyword', $request->gateway)->count();
-        // if this is an offline gateway
-        if ($onCount == 0) {
+        // if this is an offline gateway, but not native cash
+        if ($onCount == 0 && $request->gateway != 'cash') {
             $isReceipt = OfflineGateway::query()->where('user_id', $user->id)->findOrFail($request->gateway)->is_receipt;
             // if the receipt is required
             if ($isReceipt == 1) {
@@ -434,24 +434,28 @@ class PaymentController extends Controller
                 }
             }
             if ($bs->postal_code == 0 && $request->has('shipping_charge')) {
-                $order->shipping_method = $shipping->title;
-                if (!empty($shipping->free_delivery_amount) && cartTotal() >= $shipping->free_delivery_amount) {
-                    $order->shipping_charge = 0;
-                } else {
-                    $order->shipping_charge = $shipping->charge;
+                if ($shipping) {
+                    $order->shipping_method = $shipping->title;
+                    if (!empty($shipping->free_delivery_amount) && cartTotal() >= $shipping->free_delivery_amount) {
+                        $order->shipping_charge = 0;
+                    } else {
+                        $order->shipping_charge = $shipping->charge;
+                    }
                 }
             } elseif ($bs->postal_code == 1) {
-                if (!empty($shipping->free_delivery_amount) && cartTotal() >= $shipping->free_delivery_amount) {
-                    $order->shipping_charge = 0;
-                } else {
-                    $order->shipping_charge = $shipping->charge;
-                }
+                if ($shipping) {
+                    if (!empty($shipping->free_delivery_amount) && cartTotal() >= $shipping->free_delivery_amount) {
+                        $order->shipping_charge = 0;
+                    } else {
+                        $order->shipping_charge = $shipping->charge;
+                    }
 
-                $title = '';
-                if (!empty($shipping->title)) {
-                    $title = $shipping->title . ' - ';
+                    $title = '';
+                    if (!empty($shipping->title)) {
+                        $title = $shipping->title . ' - ';
+                    }
+                    $order->postal_code = $title . $shipping->postcode;
                 }
-                $order->postal_code = $title . $shipping->postcode;
                 $order->postal_code_status = 1;
             }
         }
@@ -480,6 +484,8 @@ class PaymentController extends Controller
                 ->where('user_id', $user->id)
                 ->findOrFail($request['gateway']);
             $gname = $gt->name;
+        } elseif ($gtype == 'cash_on_delivery') {
+            $gname = 'Cash On Delivery';
         } else {
             $gname = $request['gateway'];
         }

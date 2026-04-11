@@ -98,6 +98,19 @@
     @if ($activeTheme == 'desices')
         <link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/theme-12-common.css">
     @endif
+
+    <style>
+        /* CRITICAL: Force Scroll-To-Top button to be dark green */
+        html body .progress-wrap {
+            box-shadow: rgba(13, 92, 83, 0.4) 2px 3px 30px 0px !important;
+        }
+        html body .progress-wrap::after {
+            color: #0D5C53 !important;
+        }
+        html body .progress-wrap svg.progress-circle path {
+            stroke: #0D5C53 !important;
+        }
+    </style>
 </head>
 
 

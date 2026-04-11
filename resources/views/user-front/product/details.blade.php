@@ -12,29 +12,7 @@
 @section('meta-description', "$product?->meta_description")
 @section('content')
 
-    <section class="page-title-area d-flex align-items-center"
-        style="background-image: url('{{ $userBs->breadcrumb ? Uploader::getImageUrl(Constant::WEBSITE_BREADCRUMB, $userBs->breadcrumb, $userBs) : asset('assets/restaurant/images/breadcrum.jpg') }}');background-size:cover;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="page-title-item text-center">
-                        <h2 class="title">{{ $upageHeading?->items_details_page_title }}</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="{{ route('user.front.index', getParam()) }}"><i
-                                            class="flaticon-home"></i>{{ $keywords['Home'] ?? __('Home') }}</a></li>
-                                @if ($upageHeading?->items_details_page_title)
-                                    <li class="breadcrumb-item active" aria-current="page">
-                                        {{ $upageHeading?->items_details_page_title }}
-                                    </li>
-                                @endif
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <section class="shop-details-area pt-95 pb-70">
         <div class="container">
@@ -73,7 +51,7 @@
 
                                         <div class="rate">
                                             <div class="rating"
-                                                style="width:{{ !empty($product->product_reviews)? ProductReview::where('user_id', $user->id)->where('product_id', $product->product_id)->avg('review') * 20: 0 }}%">
+                                                style="width:{{ !empty($product->product_reviews) ? ProductReview::where('user_id', $user->id)->where('product_id', $product->product_id)->avg('review') * 20 : 0 }}%">
                                             </div>
                                         </div>
                                     </li>
@@ -168,7 +146,7 @@
                             @if (in_array('Online Order', $packagePermissions))
                                 <a data-href="{{ route('user.front.add.cart', [getParam(), $product->product_id]) }}"
                                     data-product="{{ $product }}" class="main-btn-2 main-btn cart-link ">
-                                    {{ $keywords['Add_to_Cart'] ??  'Add to Cart' }}
+                                    {{ $keywords['Add_to_Cart'] ?? 'Add to Cart' }}
                                     <i class="fa fa-shopping-basket"></i>
                                 </a>
                             @else
@@ -201,8 +179,8 @@
                                 </li>
                                 @if (!is_null($packagePermissions) && in_array('Online Order', $packagePermissions))
                                     <li class="nav-item">
-                                        <a class="nav-link" id="pills-contact-tab" data-toggle="pill"
-                                            href="#pills-contact" role="tab" aria-controls="pills-contact"
+                                        <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact"
+                                            role="tab" aria-controls="pills-contact"
                                             aria-selected="false">{{ $keywords['Reviews'] ?? __('Reviews') }}
                                         </a>
                                     </li>
@@ -220,14 +198,16 @@
                                             <div class="shop-review-title">
                                                 <h3 class="title">{{ count($reviews) }}
                                                     {{ $keywords['Reviews For'] ?? __('Reviews For') }}
-                                                    {{ convertUtf8($product->title) }}</h3>
+                                                    {{ convertUtf8($product->title) }}
+                                                </h3>
                                             </div>
 
                                             @foreach ($reviews as $review)
                                                 <div class="shop-review-user">
                                                     @if (
-                                                        !is_null($review->client) &&
-                                                            (strpos($review->client->photo, 'facebook') || strpos($review->client->photo, 'google')))
+                                                            !is_null($review->client) &&
+                                                            (strpos($review->client->photo, 'facebook') || strpos($review->client->photo, 'google'))
+                                                        )
                                                         <img src="{{ $review->client->photo ?? asset('assets/tenant/image/user.jpg') }}"
                                                             alt="user image" width="50">
                                                     @else
@@ -237,8 +217,7 @@
                                                     <ul>
 
                                                         <div class="rate">
-                                                            <div class="rating"
-                                                                style="width:{{ $review->review * 20 }}%"></div>
+                                                            <div class="rating" style="width:{{ $review->review * 20 }}%"></div>
                                                         </div>
                                                     </ul>
                                                     <span>
@@ -258,15 +237,12 @@
                                                                 {{ Session::get('error') }}
                                                             </p>
                                                         @enderror
-                                                        <form
-                                                            action="{{ route('user.product.review.submit', getParam()) }}"
+                                                        <form action="{{ route('user.product.review.submit', getParam()) }}"
                                                             method="POST">
                                                             @csrf
 
-                                                            <input type="hidden" value="" id="reviewValue"
-                                                                name="review">
-                                                            <input type="hidden" value="{{ $product->product_id }}"
-                                                                name="product_id">
+                                                            <input type="hidden" value="" id="reviewValue" name="review">
+                                                            <input type="hidden" value="{{ $product->product_id }}" name="product_id">
                                                             <div class="input-box">
                                                                 <span>{{ $keywords['Rating'] ?? __('Rating') }} *</span>
                                                                 <div class="review-content ">
@@ -317,7 +293,8 @@
                                                             </div>
                                                             <div class="input-box">
                                                                 <span>{{ $keywords['Comment'] ?? __('Comment') }} </span>
-                                                                <textarea name="comment" cols="30" rows="10" placeholder="{{ $keywords['Comment'] ?? __('Comment') }} "></textarea>
+                                                                <textarea name="comment" cols="30" rows="10"
+                                                                    placeholder="{{ $keywords['Comment'] ?? __('Comment') }} "></textarea>
                                                             </div>
                                                             <div class="input-btn mt-3">
                                                                 <button type="submit" class="main-btn">

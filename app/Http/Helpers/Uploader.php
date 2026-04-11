@@ -37,7 +37,7 @@ class Uploader
             $limit = LimitCheckerHelper::storageLimit($user_id);
             if ($limit > 0) {
                 $bss = BasicSetting::query()->where('user_id', $user_id)->select('storage_usage')->first();
-                $usage = (float)round($bss->storage_usage + ($img->getSize() / 1048576), 2);
+                $usage = (float) round($bss->storage_usage + ($img->getSize() / 1048576), 2);
                 if ($usage < $limit) {
                     BasicSetting::where('user_id', $user_id)->update(['storage_usage' => $usage]);
                 } else {
@@ -78,7 +78,7 @@ class Uploader
                 if (!is_null($old_img) && file_exists(public_path($oldImgPath))) {
                     $oldImageSize = filesize(public_path($oldImgPath)) / 1048576;
                     if ($userbs->storage_usage > 0) {
-                        $usage = (float)round($userbs->storage_usage - $oldImageSize, 2);
+                        $usage = (float) round($userbs->storage_usage - $oldImageSize, 2);
                         if ($usage < 0) {
                             $usage = 0;
                         }
@@ -95,7 +95,7 @@ class Uploader
             if (!is_null($old_img) && file_exists(public_path($oldImgPath))) {
                 $oldImageSize = filesize(public_path($oldImgPath)) / 1048576;
                 if ($userbs->storage_usage > 0) {
-                    $usage = (float)round($userbs->storage_usage - $oldImageSize, 2);
+                    $usage = (float) round($userbs->storage_usage - $oldImageSize, 2);
                     if ($usage < 0) {
                         $usage = 0;
                     }
@@ -124,7 +124,7 @@ class Uploader
             $limit = LimitCheckerHelper::storageLimit($user_id);
             if ($limit > 0) {
                 $bss = BasicSetting::query()->where('user_id', $user_id)->select('storage_usage')->first();
-                $usage = (float)round($bss->storage_usage + ($img->getSize() / 1048576), 2);
+                $usage = (float) round($bss->storage_usage + ($img->getSize() / 1048576), 2);
                 if ($usage < $limit) {
                     BasicSetting::where('user_id', $user_id)->update(['storage_usage' => $usage]);
                 } else {
@@ -149,7 +149,7 @@ class Uploader
         $newFileName = $file_name . "." . $ext;
         if (in_array("Amazon AWS s3", $data) && !is_null($bs->aws_access_key_id) && !is_null($bs->aws_secret_access_key) && !is_null($bs->aws_default_region) && !is_null($bs->aws_bucket)) {
             setAwsCredentials($bs->aws_access_key_id, $bs->aws_secret_access_key, $bs->aws_default_region, $bs->aws_bucket);
-            $s3 =  Storage::disk('s3');
+            $s3 = Storage::disk('s3');
             $storagePath = $s3->putFileAs($directory, $file, $newFileName);
             return [
                 'originalName' => $originalName,
@@ -164,7 +164,7 @@ class Uploader
             $limit = LimitCheckerHelper::storageLimit($user_id);
             if ($limit > 0) {
                 $bss = BasicSetting::query()->where('user_id', $user_id)->select('storage_usage')->first();
-                $usage = (float)round($bss->storage_usage + ($file->getSize() / 1048576), 2);
+                $usage = (float) round($bss->storage_usage + ($file->getSize() / 1048576), 2);
                 if ($usage < $limit) {
                     BasicSetting::where('user_id', $user_id)->update(['storage_usage' => $usage]);
                 } else {
@@ -212,7 +212,7 @@ class Uploader
             $limit = LimitCheckerHelper::storageLimit($user_id);
             if ($limit > 0) {
                 $bss = BasicSetting::query()->where('user_id', $user_id)->select('storage_usage')->first();
-                $usage = (float)round($bss->storage_usage + ($file->getSize() / 1048576), 2);
+                $usage = (float) round($bss->storage_usage + ($file->getSize() / 1048576), 2);
                 if ($usage < $limit) {
                     BasicSetting::query()->where('user_id', $user_id)->update(['storage_usage' => $usage]);
                 } else {
@@ -238,9 +238,10 @@ class Uploader
             ->first();
         if (Session::has('user')) {
             $user = Session::get('user');
-            $user_id =  $user->id;;
+            $user_id = $user->id;
+            ;
         } else {
-            $user_id =  getRootUser()->id ?? getUser()->id;
+            $user_id = getRootUser()->id ?? getUser()->id;
         }
         $data = UserPermissionHelper::currentPackageFeatures($user_id);
 
@@ -264,13 +265,13 @@ class Uploader
         }
     }
 
-    public static function downloadFile($directory, $file_unique_name, $originalName, $bs)
+    public static function downloadFile($directory, $file_unique_name, $originalName, $bs, $user_id = null)
     {
 
         $bs = AdminBs::select('aws_access_key_id', 'aws_secret_access_key', 'aws_default_region', 'aws_bucket')
             ->first();
 
-        $user_id = $user_id ?? getRootUser()->id;
+        $user_id = $user_id ?? (function_exists('getUser') && getUser() ? getUser()->id : (getRootUser() ? getRootUser()->id : null));
         $data = UserPermissionHelper::currentPackageFeatures($user_id);
 
         $pathToFile = $directory . '/' . $file_unique_name;
@@ -279,7 +280,7 @@ class Uploader
             $s3 = Storage::disk('s3');
             if (Storage::disk('s3')->exists($pathToFile)) {
                 $headers = [
-                    'Content-Type'        => 'application/pdf',
+                    'Content-Type' => 'application/pdf',
                     'Content-Disposition' => 'attachment; filename="' . $originalName . '"',
                 ];
                 return Response::make($s3->get($pathToFile), 200, $headers);
@@ -321,7 +322,7 @@ class Uploader
                 if (file_exists($pathToFileLocal)) {
                     $oldImageSize = filesize($pathToFileLocal) / 1048576;
                     if ($userbs?->storage_usage > 0) {
-                        $usage = (float)round($userbs->storage_usage - $oldImageSize, 2);
+                        $usage = (float) round($userbs->storage_usage - $oldImageSize, 2);
                         if ($usage < 0) {
                             $usage = 0;
                         }
@@ -337,7 +338,7 @@ class Uploader
             if (file_exists($pathToFileLocal)) {
                 $oldImageSize = filesize($pathToFileLocal) / 1048576;
                 if ($userbs?->storage_usage > 0) {
-                    $usage = (float)round($userbs->storage_usage - $oldImageSize, 2);
+                    $usage = (float) round($userbs->storage_usage - $oldImageSize, 2);
                     if ($usage < 0) {
                         $usage = 0;
                     }

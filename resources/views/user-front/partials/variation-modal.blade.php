@@ -12,12 +12,12 @@
                     </small>
                 </h4>
 
-                  @if ($activeTheme == "fastfood" || request()->routeIs('user.front.index'))
+                @if ($activeTheme == "fastfood" || request()->routeIs('user.front.index'))
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 @else
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 @endif
@@ -29,7 +29,8 @@
                 <div class="addon-label mt-3">
                     <h5 @if (request()->is('user-front/*')) class="text-white" @endif>
                         {{ $keywords['Select_Addons'] ?? __('Select Addons') }}
-                        ({{ $keywords['Optional'] ?? __('Optional') }})</h5>
+                        ({{ $keywords['Optional'] ?? __('Optional') }})
+                    </h5>
                 </div>
                 <div id="addons">
 
@@ -41,15 +42,13 @@
                         <div class="col-lg-3">
                             <div class="modal-quantity">
                                 <span class="minus"><i class="fas fa-minus"></i></span>
-                                <input class="form-control" type="number" name="cart-amount" value="1"
-                                    min="1">
+                                <input class="form-control" type="number" name="cart-amount" value="1" min="1">
                                 <span class="plus"><i class="fas fa-plus"></i></span>
                             </div>
                         </div>
                         <div class="col-lg-9">
-                            <button type="button"
-                                class="btn btn-primary btn-block text-uppercase modal-cart-link mt-2">
-                                <span class="d-block">{{ $keywords['Add_to_Cart'] ??  'Add to Cart' }}</span>
+                            <button type="button" class="btn btn-primary btn-block text-uppercase modal-cart-link mt-2">
+                                <span class="d-block">{{ $keywords['Add_to_Cart'] ?? 'Add to Cart' }}</span>
                                 <i class="fas fa-spinner d-none"></i>
                             </button>
                         </div>
@@ -61,8 +60,7 @@
                         <div class="col-lg-12">
                             <div class="modal-quantity">
                                 <span class="minus"><i class="fas fa-minus"></i></span>
-                                <input class="form-control" type="number" name="cart-amount" value="1"
-                                    min="1">
+                                <input class="form-control" type="number" name="cart-amount" value="1" min="1">
                                 <span class="plus"><i class="fas fa-plus"></i></span>
                             </div>
                         </div>

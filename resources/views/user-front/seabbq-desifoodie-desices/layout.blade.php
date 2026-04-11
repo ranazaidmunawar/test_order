@@ -44,7 +44,6 @@
                 {{ hexToRgba($primaryColor) }}
         }
     </style>
-
 </head>
 
 <body>
