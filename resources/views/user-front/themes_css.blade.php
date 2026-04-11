@@ -18,13 +18,13 @@
     </style>
 @endif
 @if ($activeTheme == 'fastfood' || !request()->routeIs('user.front.index'))
-    <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v=1.1">
 @endif
 @if ($activeTheme == 'fastfood' && $rtl == 1)
-    <link rel="stylesheet" href="{{ asset('assets/front/css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/responsive.css') }}?v=1.1">
 @endif
 @if ($rtl == 1)
-    <link rel="stylesheet" href="{{ asset('assets/front/css/rtl.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/rtl.css') }}?v=1.1">
 @endif
 
 @if ($activeTheme == 'fastfood' && ($userBs->is_tawkto == 1 || $userBs->is_whatsapp == 1))
