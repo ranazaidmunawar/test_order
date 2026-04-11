@@ -95,6 +95,7 @@
                 {{ hexToRgba($primaryColor) }}
         }
     </style>
+
     @if ($activeTheme == 'desices')
         <link rel="stylesheet"
             href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/theme-12-common.css') }}?v=1.1">
