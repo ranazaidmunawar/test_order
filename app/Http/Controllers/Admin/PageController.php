@@ -25,6 +25,7 @@ class PageController extends Controller
             ->where('language_id', $lang_id)
             ->orderBy('id', 'DESC')
             ->get();
+        $data['langs'] = Language::all();
         $data['lang_id'] = $lang_id;
         return view('admin.page.index', $data);
     }
@@ -32,6 +33,7 @@ class PageController extends Controller
     public function create()
     {
         $data['tpages'] = Page::query()->where('language_id', 0)->get();
+        $data['langs'] = Language::all();
         return view('admin.page.create', $data);
     }
 
@@ -58,7 +60,8 @@ class PageController extends Controller
         $page->language_id = $request->language_id;
         $page->name = $request->name;
         $page->title = $request->title;
-        $page->slug = strtolower(make_slug($request->name));;
+        $page->slug = strtolower(make_slug($request->name));
+        ;
         $page->body = Purifier::clean($request->body, 'youtube');
         $page->status = $request->status;
         $page->meta_keywords = $request->meta_keywords;
@@ -95,7 +98,8 @@ class PageController extends Controller
         $page = Page::query()->findOrFail($pageId);
         $page->name = $request->name;
         $page->title = $request->title;
-        $page->slug = strtolower(make_slug($request->name));;
+        $page->slug = strtolower(make_slug($request->name));
+        ;
         $page->body = Purifier::clean($request->body, 'youtube');
         $page->status = $request->status;
         $page->meta_keywords = $request->meta_keywords;

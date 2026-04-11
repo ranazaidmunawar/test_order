@@ -28,9 +28,11 @@ class AdminComposer
             }
         }
 
+        $langs = \App\Models\Language::all();
         $data = [
             'bs' => $bs,
-            'be' => $be
+            'be' => $be,
+            'langs' => $langs
         ];
 
         $view->with($data);

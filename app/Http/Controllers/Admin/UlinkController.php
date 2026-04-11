@@ -16,6 +16,7 @@ class UlinkController extends Controller
         $lang = Language::where('code', $request->language)->first();
         $lang_id = $lang->id;
         $data['aulinks'] = Ulink::where('language_id', $lang_id)->get();
+        $data['langs'] = Language::all();
         $data['lang_id'] = $lang_id;
         return view('admin.footer.ulink.index', $data);
     }
