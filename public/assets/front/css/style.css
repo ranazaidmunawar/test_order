@@ -1603,8 +1603,8 @@ ul.login a {
 }
 
 .page-title-area {
-    padding-top: 170px;
-    padding-bottom: 70px;
+    padding-top: 70px;
+    padding-bottom: 20px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1653,18 +1653,18 @@ ul.login a {
 
 .page-title-area .page-title-item nav ol li i {
     font-size: 26px;
-    color: #fff;
+    /* color: #fff; */
     margin-inline-end: 10px;
 }
 
 .page-title-area .page-title-item nav ol li a {
-    color: #fff;
+    /* color: #fff; */
     display: inline-flex;
     align-items: center;
 }
 
 .breadcrumb-item+.breadcrumb-item::before {
-    color: #fff;
+    /* color: #fff; */
     content: ">";
 }
 

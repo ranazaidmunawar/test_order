@@ -84,9 +84,9 @@
 
         @if ($activeTheme == 'seabbq')
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/header/header-10.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/header/header-10.css') }}?v=1.1">
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/footer/footer-10.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/footer/footer-10.css') }}?v=1.1">
             @if ($rtl == 1)
                 <link rel="stylesheet"
                     href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/homepage/rtl-style-10.css">
@@ -94,9 +94,9 @@
         @endif
         @if ($activeTheme == 'desifoodie')
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/header/header-11.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/header/header-11.css') }}?v=1.1">
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/footer/footer-11.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/footer/footer-11.css') }}?v=1.1">
             @if ($rtl == 1)
                 <link rel="stylesheet"
                     href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/homepage/rtl-style-11.css">
@@ -104,9 +104,9 @@
         @endif
         @if ($activeTheme == 'desices')
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/header/header-12.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/header/header-12.css') }}?v=1.1">
             <link rel="stylesheet"
-                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/footer/footer-12.css">
+                href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/footer/footer-12.css') }}?v=1.1">
             @if ($rtl == 1)
                 <link rel="stylesheet"
                     href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/homepage/rtl-style-12.css">
@@ -115,4 +115,4 @@
     @endif
 @endif
 <!-- Swiper CSS -->
-<link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices') }}/css/swiper-bundle.min.css" />
+<link rel="stylesheet" href="{{ asset('assets/restaurant/seabbq-desifoodie-desices/css/swiper-bundle.min.css') }}?v=1.1" />
